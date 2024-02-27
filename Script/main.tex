@@ -1,0 +1,27 @@
+% main.tex
+\documentclass{mathbook} % Use the custom mathbook class
+
+% Title and author
+\title{Mathematical Machine Learning}
+\author{Yahya \textsc{Saleh}, Tizian \textsc{Wenzel}, Kamal \textsc{Sharma}}
+
+\bibliography{mml}
+
+\begin{document}
+
+\frontmatter % Front matter (title page, table of contents, etc.)
+
+\maketitle % Title page
+
+\tableofcontents % Table of contents
+
+% Include chapters from the 'chapters' folder
+\include{chapters/chapter1}
+\include{chapters/chapter2}
+\include{chapters/chapter3}
+\include{chapters/chapter4}
+\include{chapters/chapter5}
+\printbibliography[heading=bibintoc]
+% Add more chapters as needed...
+
+\end{document}

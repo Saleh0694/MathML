@@ -295,6 +295,34 @@ TSWLatexianTemp*
 # xwatermark package
 *.xwm
 
+# Jupyter Notebook generated files
+.ipynb_checkpoints/
+
+# Jupyter Notebook backup files
+*.ipynb~
+
+# Jupyter Notebook workspace
+.nbgrader.log
+
+# Virtual environment
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.env
+.env.*
+dist/
+build/
+*.egg-info/
+
+
 # REVTeX puts footnotes in the bibliography by default, unless the nofootinbib
 # option is specified. Footnotes are the stored in a file with suffix Notes.bib.
 # Uncomment the next line to have this generated file ignored.
