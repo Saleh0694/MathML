@@ -122,4 +122,34 @@
   \iffieldundef{url}{#1}{\href{\thefield{url}}{#1}}%
 }
 
+  % define environments for theorems, lemmas, examples, etc. 
+\newcommand{\definitionautorefname}{Definition}
 
+\newtheorem{example}{Example}[chapter] % 
+
+  
+  \usepackage{mdframed}
+  \newenvironment{boxedexample}{%
+  \refstepcounter{example}
+  \begin{mdframed}[linewidth=1pt,linecolor=black,backgroundcolor=gray!10,roundcorner=5pt]
+    \textbf{Example \theexample.}
+}{%
+  \end{mdframed}
+  }
+
+  \newenvironment{boxedrmk}{%
+  \refstepcounter{rmk}
+  \begin{mdframed}[linewidth=1pt,linecolor=black,backgroundcolor=gray!10,roundcorner=5pt]
+    \textbf{Remark \thermk.}
+}{%
+  \end{mdframed}
+  }
+
+
+  % Define a command to refer to problems in the Lab. 
+\usepackage{tikz}
+\usepackage{fontawesome5}
+% Define custom command
+\newcommand{\complementary}[1]{%
+    \faHandPointRight \ \textcolor{green!50!black} {#1}%
+}
