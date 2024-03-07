@@ -4,6 +4,20 @@
 \ProvidesClass{mathbook}[2024/02/27 Math Book Class]
 
 \LoadClass{book}
+% Reset section counter at the start of each chapter
+\let\oldchapter\chapter
+\renewcommand{\chapter}{\setcounter{section}{0}\oldchapter}
+
+% adjust the geometry
+\usepackage{geometry}
+\geometry{
+    a4paper,
+    left=3cm,
+    right=3cm,
+    top=2cm,
+    bottom=2cm
+}
+
 
 \RequirePackage{amsmath} % For advanced mathematical typesetting
 \RequirePackage{amsthm} % For theorem environments
@@ -19,7 +33,6 @@
 }
 %\setcounter{chapter}{1}
 \renewcommand\thechapter{\Roman{chapter}} % Use Roman numerals for chapter numbers
-
 \makeatletter
 \renewcommand*\l@chapter[2]{%
   \ifnum \c@tocdepth >\m@ne
@@ -38,8 +51,6 @@
     \endgroup
   \fi}
 \makeatother
-
-
 % Library 
 \usepackage[backend=bibtex,maxbibnames=99,firstinits=true,style=numeric-comp,url=false,sorting=none]{biblatex}
 % Use 
