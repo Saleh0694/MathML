@@ -1,24 +1,11 @@
-github repo: https://github.com/Saleh0694/MathML
+# Mathematical Machine Learning 
 
+The repository contains material that was developed as lecture notes for the course "Mathematical Machine Learning" prepared for master students at Universität Hamburg. 
 
+The focus of the course is laid on some mathematical topics in modern machine learning, such as the curse of dimensionality. The script is accompanied by a computational lab, i.e., a collections of programming notebooks that exemplify problems mentioned in the script. 
 
-# Overview lectures
-
-- 1 	Di, 2. Apr. 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 2 	Di, 9. Apr. 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 3 	Di, 16. Apr. 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 4 	Di, 23. Apr. 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 5 	Di, 30. Apr. 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 6 	Di, 7. Mai 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 7 	Di, 14. Mai 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 8 	Di, 28. Mai 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 9 	Di, 4. Jun. 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 10 	Di, 11. Jun. 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 11 	Di, 18. Jun. 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 12 	Di, 25. Jun. 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 13 	Di, 2. Jul. 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh
-- 14 	Di, 9. Jul. 2024 	12:15 	13:45 	Geom H1 	Dr. Yahya Saleh 
-
-
+## Pre-requesities  
+tba. 
+## Using the lab. 
 
 
