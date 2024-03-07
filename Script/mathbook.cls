@@ -4,6 +4,20 @@
 \ProvidesClass{mathbook}[2024/02/27 Math Book Class]
 
 \LoadClass{book}
+% Reset section counter at the start of each chapter
+\let\oldchapter\chapter
+\renewcommand{\chapter}{\setcounter{section}{0}\oldchapter}
+
+% adjust the geometry
+\usepackage{geometry}
+\geometry{
+    a4paper,
+    left=3cm,
+    right=3cm,
+    top=2cm,
+    bottom=2cm
+}
+
 
 \RequirePackage{amsmath} % For advanced mathematical typesetting
 \RequirePackage{amsthm} % For theorem environments
@@ -19,7 +33,6 @@
 }
 %\setcounter{chapter}{1}
 \renewcommand\thechapter{\Roman{chapter}} % Use Roman numerals for chapter numbers
-
 \makeatletter
 \renewcommand*\l@chapter[2]{%
   \ifnum \c@tocdepth >\m@ne
@@ -38,8 +51,6 @@
     \endgroup
   \fi}
 \makeatother
-
-
 % Library 
 \usepackage[backend=bibtex,maxbibnames=99,firstinits=true,style=numeric-comp,url=false,sorting=none]{biblatex}
 % Use 
@@ -111,4 +122,34 @@
   \iffieldundef{url}{#1}{\href{\thefield{url}}{#1}}%
 }
 
+  % define environments for theorems, lemmas, examples, etc. 
+\newcommand{\definitionautorefname}{Definition}
 
+\newtheorem{example}{Example}[chapter] % 
+
+  
+  \usepackage{mdframed}
+  \newenvironment{boxedexample}{%
+  \refstepcounter{example}
+  \begin{mdframed}[linewidth=1pt,linecolor=black,backgroundcolor=gray!10,roundcorner=5pt]
+    \textbf{Example \theexample.}
+}{%
+  \end{mdframed}
+  }
+
+  \newenvironment{boxedrmk}{%
+  \refstepcounter{rmk}
+  \begin{mdframed}[linewidth=1pt,linecolor=black,backgroundcolor=gray!10,roundcorner=5pt]
+    \textbf{Remark \thermk.}
+}{%
+  \end{mdframed}
+  }
+
+
+  % Define a command to refer to problems in the Lab. 
+\usepackage{tikz}
+\usepackage{fontawesome5}
+% Define custom command
+\newcommand{\complementary}[1]{%
+    \faHandPointRight \ \textcolor{green!50!black} {#1}%
+}
