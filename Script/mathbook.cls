@@ -8,6 +8,7 @@
 \let\oldchapter\chapter
 \renewcommand{\chapter}{\setcounter{section}{0}\oldchapter}
 
+\pagenumbering{arabic} % Change page numbering style to Arabic numbers
 % adjust the geometry
 \usepackage{geometry}
 \geometry{

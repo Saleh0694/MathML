@@ -289,19 +289,37 @@ phenomenon. In other words, the computational scaling for using them to achieve
 a certain accuracy on a given task do not scale dramatically with the dimension
 of the problem. Characterizing such cases and providing rigorous understanding of
 this is a crucial point in modern mathematical machine learning. We will touch
-on this topic in \autoref{Chapter4}.
+on this topic in \autoref{Chapter4}. Moreover, this topic will be of major
+interest to us when considering physics-informed neural networks. 
 
 \subsection{Approximating Highly-Oscillatory Functions}
-\begin{boxedexample}[Classification] \complementary{\theexample}
-    \label{ex:oscillatory}
-    tba.
-\end{boxedexample}
+The computational costs of approximation models, whether linear or nonlinear,
+seem to increase exponentially with an increase in the oscillation of a target
+function. This is a major bottleneck in some applications such as quantum
+dynamics. An important example here is approximating solutions to
+time-independent Schrödinger equations. Similar to \autoref{ex:CoD_TISE}, the
+task here is to diagonalize a differential operator that describes a certain
+quantum system. We look here at a specific example, where $H$ represents an
+operator, that describes vibrational motions inside a molecule. Given a linear
+numerical method to compute the eigenvalues, we look in \autoref{fig:osc} at the
+relative accuracy of the
+first 100 eigenvalues as a function of the truncation parameter $N$. It is clear
+that larger eigenvalues are harder to approximate. Morever, increasing the
+truncation parameter $N$ does a worse job for improving the accuracy of higher
+eigenvalues than lower eigenvalues. This is partially because, larger
+eigenvalues correspond to highly-oscillatory functions. For details on the
+calculations see~\cite{Saleh:arXiv2308}.
 
-\subsection{Validity of Ocaam Razor and Double-Descent Phenomenon}
-\begin{boxedexample}[Double descent] \complementary{\theexample}
-    \label{ex:double_descent}
-    tba.
-\end{boxedexample}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{H2S.pdf}
+    \caption{The relative accuracy of the approximate first 100 eigenvalues of the vibrational Schrödinger equation for H$_2$S as a function of the truncation parameter $N$.}
+    \label{fig:osc}
+\end{figure}   
+We will see in \autoref{Chapter4} that neural-network approximation methods can
+significantly improve approximation capabilities for highly-oscillatory functions.
+\subsection{Validity of Ocaam Razor and the Overparametrized Regime}
+
 
 \section*{Wait! What is what?}
 Here is a list of questions that help you check your understanding of key
