@@ -318,11 +318,54 @@ calculations see~\cite{Saleh:arXiv2308}.
 \end{figure}   
 We will see in \autoref{Chapter4} that neural-network approximation methods can
 significantly improve approximation capabilities for highly-oscillatory functions.
-\subsection{Validity of Ocaam Razor and the Overparametrized Regime}
+\subsection{Validity of Occam's Razor and the Overparametrized Regime}
+Theoretical and empirical results have demonstrated in the past 40 years that
+Occam's Razor principle is valid when dealing with machine-learning problems:
+\emph{Simple solutions are favored over unnecessarily complex ones.} Indeed,
+one can see in, e.g., \autoref{ex:regression} that using a very high-order
+polynomial can produce very good results on the training data, but fail badly to
+produce sensible predictions on unseen data, resulting in an overfitting
+phenomenon. However, new evidence implies that very complex neural networks seem
+to generalize well on unseen data. In particular, many of the very successul
+machine-learning models that we use in our everyday life are heavily
+overparamterized, i.e., they have way more optimizable parameters than training
+data. Neverthess they generalize well on unseen data. Understanding the
+behavior of machine-learning models in this overparameterized regime is an
+important research direction in modern machine learning.
 
+\section*{What is not covered in this course}
+The field of mathematical machine learning is huge and spans many standard
+mathematical areas, ranging from (geometric) measure theory to statistical
+learning theory, optimization theory and functional analysis. It is hence very
+challenging to cover all topics in a master course. Here is a list of topics
+that we do very little to cover in this course and some references for
+self-study. 
+
+\begin{itemize}
+    \item Optimizers and their convergence are largely ignored in this course.
+    We use standard first order optimizers in all our numerical examples and do
+    not comment on their convergence properties. 
+    \item Bayesian learning models are largely marginalized.
+    \item Unsupervised learning algorihtms such as clustering, and
+    dimensionality reduction.
+\end{itemize}
+
+
+%----------------------------------------------------------------------------------------
 
 \section*{Wait! What is what?}
 Here is a list of questions that help you check your understanding of key
-concepts inside this chapter?
+concepts inside this chapter.
 
-%----------------------------------------------------------------------------------------
+\begin{enumerate}
+    \item What are some examples of hypothesis classes? Which of them are
+    linear, resp. nonlinear, approximation methods?
+    \item What loss functions do you know for regression, resp. classification
+    tasks? Can you think of other examples than the ones mentioned in this
+    chapter?
+    \item For a fitting problem, can we get more accurate results by increasing
+    the complexity of the hypothesis class?
+    \item How are the computational costs related to the dimension of the
+    problem? 
+\end{enumerate}
+
