@@ -90,12 +90,57 @@ Let's look at some concrete examples.
 
 \begin{boxedexample}[Classification] \complementary{\theexample}
     \label{ex:classification}
-\end{boxedexample}
+    We consider a classification problem of hand-written digits. The input to
+    the problem is an $8 \times 8$ image of a hand-written digit, and the output
+    should be the predicted value of the digit. Formally, we consider $x$ to be a
+    random variable taking values in $[0, 16]^{8 \times 8} \subset
+    \mathbf{N}^{8 \times 8}$, i.e., $x$ is a random variables in a matrix
+    representation, where each matrix element takes an integer value between 0
+    and 16. Here, the value of a certain matrix element represents its color,
+    where 0 denotes black, and 16 denotes white. Let the target value $y$ be a
+    random variable taking values in the discrete set $\{0,1,2,3,4,5,6,7,8,9\}$.
+    To solve this supervised learning problem we consider as a hypothesis class
+    the following multilayer perceptron:
+    \begin{equation*}
+        \mathfrak{H} = \bigl\{\text{softmax } w_2 \left(\sigma (w_1 \cdot x + b_1 ) \right) + b_2 ; w_1 \in \mathbb{R}^{\text{dh}, 8}, b_1 \in \mathbb{R}^{\text{dh}}, w_2 \in \mathbb{R}^{10, \text{dh}}, b_2 \in \mathbb{R}^{10}   \bigr\},
+    \end{equation*}
+    where dh is called the number of hidden units. In this class, the linear
+    parameters are the weight matrices $w_1, w_2$ and the biases $b_1, b_2$.
+    $\sigma$ is a nonlinear non-learnable function, often referred to by the \emph{activation function}. A common choice
+    is the ReLU (Rectified Linear Unit) function
+    \begin{equation*}
+        \text{ReLU}(x) = \max(0, x)    
+    \end{equation*}
+ The softmax function (or layer) takes a set of real-valued input  and
+ transforms it into a probability distribution over multiple classes. In our
+ example we have ten classes and the softmax is given by
+    \begin{equation*}
+        \text{softmax}(z)_i = \frac{e^{z_i}}{\sum_{j=1}^{10} e^{z_j}}.
+    \end{equation*}
 
+    For facilitating the implementation we represent the target value as a one-hot
+    vector. For example, given a target value 4, we represent it as the vector $y =
+    (0,0,0,1,0,0,0,0,0,0)$. A suitable loss function for such problems is the
+    categorical cross
+    entropy
+    function given by 
+    \begin{equation*}
+        l(h(x_i), y_i) = \sum_{c=0}^9 y_{i}^c \log(h(x_i)^c),
+    \end{equation*}
+    where $(x_i, y_i)$ is a specific training example. $y_{i}^c$ refers to the
+    $c$-th entry of the one-hot vector representation of the target.
+
+    Compute the training and test errors and study how they change when changing
+    the number hidden units or number of layers.
+\end{boxedexample}
+Therefore, the output of the hypothesis function is a probability distribution
+over the 10 classes. Concretly, the output is 10-dimensional, where each entry
+denotes the probability of the input image to represent a certain digit. 
+  
 \autoref{fig:regression} shows two hypotheses, one linear and one nonlinear, that we learned to fit the data in
 \autoref{ex:regression}. The figure depicts an interesting phenomenon; a certain
 hypothesis $h$ can fit the data too accurately; notice for example in
-\autoref{fig:Regression} that the polynomial-regression model fits badly local
+\autoref{fig:regression} that the polynomial-regression model fits badly local
 minima of the target function. In these regions, it is optimized to fit the
 noise. The outcome of such a result is that the polynomial-regression model will
 fail to generalize well in these regions, i.e., it will have large error on
