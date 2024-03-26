@@ -117,7 +117,10 @@ Let's look at some concrete examples.
     \begin{equation*}
         \text{softmax}(z)_i = \frac{e^{z_i}}{\sum_{j=1}^{10} e^{z_j}}.
     \end{equation*}
-
+    Therefore, the output of the hypothesis function is a probability distribution
+    over the 10 classes. Concretly, the output is 10-dimensional, where each entry
+    denotes the probability of the input image to represent a certain digit. 
+    
     For facilitating the implementation we represent the target value as a one-hot
     vector. For example, given a target value 4, we represent it as the vector $y =
     (0,0,0,1,0,0,0,0,0,0)$. A suitable loss function for such problems is the
@@ -133,9 +136,6 @@ Let's look at some concrete examples.
     Compute the training and test errors and study how they change when changing
     the number hidden units or number of layers.
 \end{boxedexample}
-Therefore, the output of the hypothesis function is a probability distribution
-over the 10 classes. Concretly, the output is 10-dimensional, where each entry
-denotes the probability of the input image to represent a certain digit. 
   
 \autoref{fig:regression} shows two hypotheses, one linear and one nonlinear, that we learned to fit the data in
 \autoref{ex:regression}. The figure depicts an interesting phenomenon; a certain
@@ -161,7 +161,9 @@ overfitting:
 \subsection{Supervised Learning Formally}
 A formal definition of learning.
 
-\section{Curse of Dimensionality}
+\section{This Course}
+What we will cover at what we want. 
+\subsection{Curse of Dimensionality}
 Programming exercise and theorem about approximating smooth functions in higher
 dimensions. 
 \begin{boxedexample}[Classification] \complementary{\theexample}
@@ -169,13 +171,13 @@ dimensions.
 tba.
 \end{boxedexample}
 
-\section{Approximating Highly-Oscillatory Functions}
+\subsection{Approximating Highly-Oscillatory Functions}
 \begin{boxedexample}[Classification] \complementary{\theexample}
     \label{ex:oscillatory}
     tba.
 \end{boxedexample}
 
-\section{Validity of Ocaam Razor and Double-Descent Phenomenon}
+\subsection{Validity of Ocaam Razor and Double-Descent Phenomenon}
 \begin{boxedexample}[Double descent] \complementary{\theexample}
     \label{ex:double_descent}
     tba.
