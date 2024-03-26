@@ -131,11 +131,14 @@
   \usepackage{mdframed}
   \newenvironment{boxedexample}{%
   \refstepcounter{example}
+  \label{example:\theexample} % Add label with custom prefix
   \begin{mdframed}[linewidth=1pt,linecolor=black,backgroundcolor=gray!10,roundcorner=5pt]
     \textbf{Example \theexample.}
 }{%
   \end{mdframed}
   }
+% Modify autoref name for the example prefix
+\providecommand*{\exampleautorefname}{Example}
 
   \newenvironment{boxedrmk}{%
   \refstepcounter{rmk}
@@ -146,6 +149,7 @@
   }
 
 
+
   % Define a command to refer to problems in the Lab. 
 \usepackage{tikz}
 \usepackage{fontawesome5}
@@ -153,3 +157,7 @@
 \newcommand{\complementary}[1]{%
     \faHandPointRight \ \textcolor{green!50!black} {#1}%
 }
+
+
+\RequirePackage{graphicx} % Required to include images
+\graphicspath{{Figures/}{./}} % Specifies where to look for included images
