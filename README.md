@@ -16,7 +16,7 @@ conda install --file requirements.txt
 
 ## Using the lab. 
 
-Lunch the jupyter notebook server by typing
+Launch the jupyter notebook server by typing
 ```
 jupyter notebook
 ```
