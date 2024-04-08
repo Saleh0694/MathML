@@ -8,7 +8,6 @@
 \let\oldchapter\chapter
 \renewcommand{\chapter}{\setcounter{section}{0}\oldchapter}
 
-\pagenumbering{arabic} % Change page numbering style to Arabic numbers
 % adjust the geometry
 \usepackage{geometry}
 \geometry{
@@ -18,7 +17,16 @@
     top=2cm,
     bottom=2cm
 }
+\usepackage{fancyhdr}
 
+% Define page style
+% Define page style
+\fancyhf{} % Clear header and footer
+\renewcommand{\headrulewidth}{0pt} % Remove header rule
+\fancyfoot[C]{\thepage} % Page number in bottom center
+
+% Apply page style to all pages
+\pagestyle{fancy}
 \usepackage{enumerate}
 \RequirePackage{amsmath} % For advanced mathematical typesetting
 \RequirePackage{amsthm} % For theorem environments
