@@ -80,12 +80,61 @@ finite classes do not overfit. Our results to this end motivate a notion of
 statistical learning that we discuss.
 
 \subsection{A Formal Setting of Learning}
+Let $z = (x, y)$ be a random vector where $x: \Omega \to \mathbb{R}^n$ and $y$
+is generated from $x$ by the functional relation $y=f(x)$, where $f: \mathbb{R}
+\to \{0,1\}$, i.e., we restrict ourselves to the classification case. Denote by
+$\mathcal{P}$ the probability distribution of $z$ and by $\mathcal{P}_x$ the
+marginal probability distribution corresponding to the random vector $x$.
+Further, we set $\mathbb{Z} := \mathbb{R}^n \times \{0,1\}$ \footnote{Do not
+confuse the notation with the set of integers.}.
+
+Given a hypothesis class $\mathfrak{H}$  and a loss function $l$ the goal of a supervised-learning
+algorithm is to solve 
+\begin{equation*}
+    \underbrace{R_{\mathcal{P}}(h) := \int_{\mathbb{Z}} l(y, h(x)) \ d \mathcal{P}}_{\text{True risk}} \longrightarrow \min_{h \in \mathfrak{H}} \implies h^\star, 
+\end{equation*}
+that is, to minimize the true risk. Note that the true risk is also called a
+generalization error. However, one only has access to a finite
+realiazation of the random vector $z$, i.e., to a training set $D=\{(x_i,
+y_i)_{i=1}^m\}$. A reasonable think to do is, hence, to minimize a
+finite/empirical representation of the true risk, i.e., to solve
+\begin{equation*}
+    \underbrace{\hat{R}_{\mathcal{P}} (h) := \sum_{(x,y) \in \hat{z}} \frac{1}{|\hat{z}|}l(y, h(x)) }_{\text{Empirical risk}} \longrightarrow \min_{h \in \mathfrak{H}} \implies \hat{h}^\star.
+\end{equation*}
+
+A learning algorithm that replaces the original task of minimizing the true risk
+by the task of minimizing the empirical risk is called an \emph{ERM learner} or
+is said to be using the \emph{ERM learning} rule. 
+
+One of the main problems of statistical learning theories is to study the
+validity of approximating $h^*$ by $\hat{h}^*$. In particular, under what
+conditions on the hypothesis class does $\hat{h}^*$ have a small generalization error,
+i.e.? We
+will see that naively minimizing the loss function. 
+
+In the next section, we will see that the finiteness of the hypothesis class is
+a sufficient condition to this end. 
 
 \subsection{Finite Hypothesis Classes do not Overfit}
+We start this section by defining the 0-1 loss for classification tasks:
+\begin{equation*}
+    l(y, h(x)) =
+    \begin{cases}
+         & 1: \ h(x) \neq y \\
+        & 0: \ \text{otherwise}.
+    \end{cases}	
+\end{equation*}
+Note that in this case, the true and empirical risks simplify to
+$$
+R_{\mathcal{P}}(h) = \mathcal{P}_x \bigl(\{x: h(x) \neq y\} \bigr)
+$$
+$$
+\hat{R}_{\mathcal{P}}(h) = \frac{1}{m} | \{x: h(x) \neq y\} |
+$$
 
-\centering \emph{The Realizability Assumption}
-
-	There exists $h^* \in \mathfrak{H}$ s.t. $R_{\mathcal{P}_z}(h^*) = 0$.
+Throughout we use the 
+ \emph{Realizability Assumption}, i.e., that
+there exists $h^* \in \mathfrak{H}$ s.t. $R_{\mathcal{P}_z}(h^*) = 0$.
 
     \begin{lemma}
 		Let $\mathfrak{H}$ be a finite hypothesis class, and $l$ be the 0-1 loss
@@ -99,7 +148,9 @@ statistical learning that we discuss.
 	In other words: the probability of sampling $m$ training data points and
 	obtaining a learner $h_s$ by the ERM rule that does not generalize well is
 	upperbounded by a finite quantity.
-
+\begin{proof}
+    tba.
+\end{proof}
     \begin{coro}
 		\label{Coro:finite_hypo}
 		Let $\mathfrak{H}$ be a finite hypothesis class and $l$ be the 0-1 loss
@@ -119,6 +170,9 @@ statistical learning that we discuss.
 		holds with probability of at least $1-\delta$ over the choice of the
 		training data $S|x$.
 	\end{coro}
+    \begin{proof}
+        tba.
+    \end{proof}
 \section{Probably Approximately Correct Learning}
     \begin{definition}
 		A hypothesis class $\mathfrak{H}$ is PAC learnable if there exist a
