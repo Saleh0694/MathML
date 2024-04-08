@@ -19,7 +19,7 @@
     bottom=2cm
 }
 
-
+\usepackage{enumerate}
 \RequirePackage{amsmath} % For advanced mathematical typesetting
 \RequirePackage{amsthm} % For theorem environments
 \RequirePackage{amsfonts} % For additional mathematical fonts
@@ -124,9 +124,38 @@
 }
 
   % define environments for theorems, lemmas, examples, etc. 
-\newcommand{\definitionautorefname}{Definition}
-
-\newtheorem{example}{Example}[chapter] % 
+  \theoremstyle{plain}
+  \newtheorem{thm}{Theorem}[chapter] % reset theorem numbering for each 
+  %chapter
+  \newcommand{\thmautorefname}{Theorem}
+  
+  \theoremstyle{definition}
+  \newtheorem{definition}{Definition}[chapter] % definition numbers are 
+  %dependent 
+  %on theorem numbers
+  \newcommand{\definitionautorefname}{Definition}
+  
+  \newtheorem{example}{Example}[chapter] % 
+  %\setcounter{example}{1}
+  %same for example numbers
+  \newcommand{\exampleautorefname}{Example}
+  \theoremstyle{italic}
+  \newtheorem{prop}{Proposition}[chapter] % same for example numbers
+  \newcommand{\propautorefname}{Proposition}
+  
+  \newtheorem{coro}{Corollary}[chapter] % same for example numbers
+  \newcommand{\coroautorefname}{Corollary}
+  
+  \newtheorem{rmk}{Remark}[chapter] % same for example numbers
+  \newcommand{\rmkautorefname}{Remark}
+  \newtheorem{lemma}{Lemma}[chapter] % same for example numbers
+  \newcommand{\lemmaautorefname}{Lemma}
+  \theoremstyle{plain}
+  \newtheorem{assump}{Assumption}[chapter] 
+  \newcommand{\assumpautorefname}{Assumption}
+  \newtheorem{problem}{Problem}[chapter] % same for example numbers
+  \newcommand{\problemautorefname}{Problem}
+ 
 
   
   \usepackage{mdframed}
