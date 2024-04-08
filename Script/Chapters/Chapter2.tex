@@ -1,7 +1,155 @@
 % Chapter 1
 % !TeX spellcheck = en_US 
-\chapter{Empirical Risk Minimization Principles} % Main chapter title
+\chapter{Statistical Learning Theory} % Main chapter title
 
 \label{Chapter2} % For referencing the chapter elsewhere, use \ref{Chapter1} 
 \setcounter{chapter}{2}
 %----------------------------------------------------------------------------------------
+In the previous chapter we have observed the phenomenon of overfitting; a model
+trained to minimize the empirical risk on a training dataset can still fail to generalize
+well over unseen dataset. A fundamental question in statistical learning theory is how to design
+hypothesis classes that do not overfit.  
+
+We will see in this chapter that restricting the hypothesis classes can help
+reduce the overfitting. First, we start by looking at finite hypothesis classes
+and show that they do not overfit. This result will also motivate a famous
+notion of statistical learning, that of \emph{probably approximately correct
+(PAC)} learning. However, finiteness of the hypothesis class is, indeed, a very
+restricting condition. We will look at infinite classes that do not lead to
+overfitting and then characterize PAC learnability. The reader is referred to
+[] for more details. 
+
+We start this section by recalling some basic definitions of probability
+measure theory.
+\section{Probability Measure Theory}
+As we have seen in \autoref{Chapter1}, training datasets are treated as random
+variables. This makes the following tools from probability theory essential. 
+
+Let $(\Omega,\mathcal{A}, \mathbb{P})$ be a probability measure space, where $\Omega \subseteq \mathbb{R}$. 
+It is common to refer to any $A \in \mathcal{A}$ by an \emph{event}. An event
+$A$ s.t. $\mathbb{P}(A)=1$ is said to happen \emph{almost surley.}
+
+Important probability measures are those induced by measurable transformations in the following way. 
+\begin{definition}[Push-forward measure]
+	Given a measure space $(\Omega, \mathcal{A}, \mathbb{P})$ and a measurable mapping $h:\Omega \to \Omega$ 
+	the \emph{push-forward measure of $\lambda$} is 
+	$$
+	h_\#\lambda (A) = \lambda (h^{-1}(A)) \quad  \forall A \in \mathcal{A}.
+	$$
+	The push-forward measure is sometimes denoted by $\lambda h^{-1}$.
+\end{definition}
+
+We look now at a special kind of measurable mappings and the measures they induce.
+\begin{definition}[Real Random Variables and Distributions]
+	\label{def:RV}
+	\begin{enumerate}[(i)]
+		\item A measurable mapping $V: \Omega \to \mathbb{R}$ is called a \emph{real random variable}.
+		\item The push-forward measure $P_V := V_\# \mathbb{P}$ induced by a real random variable $V$ 
+		is called the \emph{distribution of $V$}.		
+	\end{enumerate}
+\end{definition}
+
+
+\begin{definition}[Independent events]
+Two events $A,B$ are said to be \emph{independent} if $$\mathbb{P}(A \cap B) = \mathbb{P}(A)\mathbb{P}(B).$$ Given 
+an index set $I$, a family $(A_i)_{i \in I}$ of events is said to be \emph{independent}
+if $$\mathbb{P}(\cap_{j \in J} A_j) = \prod_{j \in J} \mathbb{P}(A_j) \quad \forall J \subset I.$$	
+\end{definition}
+
+The following is an important family of random variables that one often encounters 
+in machine learning and statistics. 
+\begin{definition}[Independent and identically distributed random variables]
+	\label{def:iid}
+	Let $I$ be an index set and $(V_i)_{i \in I}$ be a family of real random 
+	variables. Endow $\mathbb{R}$ with the Borel-$\sigma$ algebra $\mathcal{B}$.
+	\begin{enumerate}[(i)]
+		\item The family $(V_i)_{i \in I}$ is said to be \emph{identically distributed} if 
+		$$P_{V_i} = P_{V_j} \quad \forall i, j \in I.$$
+		\item The family $(V_i)_{i \in I}$ is said to be \emph{independent} if the 
+		family of generated sigma algebras $(\sigma(V_i))_{i\in I}$, where 
+		$\sigma(V_i) = V_i^{-1}(\mathcal{B})$ is independent.
+	\end{enumerate}
+A family of real random variables satisfying both conditions is said to be \emph{i.i.d.}
+In such a case set $P = P_{V_i}$. \end{definition}
+
+\section{Probably Approximately Correct Learning}
+
+We start this chapter by formalizing the setting of learning and the problem of
+overfitting. We then look closely at the problem of overfitting and show that
+finite classes do not overfit. Our results to this end motivate a notion of
+statistical learning that we discuss.
+
+\subsection{A Formal Setting of Learning}
+
+\subsection{Finite Hypothesis Classes do not Overfit}
+
+\centering \emph{The Realizability Assumption}
+
+	There exists $h^* \in \mathfrak{H}$ s.t. $R_{\mathcal{P}_z}(h^*) = 0$.
+
+    \begin{lemma}
+		Let $\mathfrak{H}$ be a finite hypothesis class, and $l$ be the 0-1 loss
+		function. Let $S|_x = (x_1, \dots, x_m)$ be a set of $m$ training points
+		sampled from $\mathcal{P}_x$. Under the realizability assumption and
+		for accuracy $\epsilon >0$ it holds that 
+		$$
+		\mathcal{P}_x\bigl(\{S|_x: R_\mathcal{P}(h_s) > \epsilon\} \bigr) \leq |\mathfrak{H}| e ^{-\epsilon m}.
+		$$
+	\end{lemma}
+	In other words: the probability of sampling $m$ training data points and
+	obtaining a learner $h_s$ by the ERM rule that does not generalize well is
+	upperbounded by a finite quantity.
+
+    \begin{coro}
+		\label{Coro:finite_hypo}
+		Let $\mathfrak{H}$ be a finite hypothesis class and $l$ be the 0-1 loss
+		function. Let $\delta \in (0,1)$ be a confidence parameter and $\epsilon \in
+		(0,1)$ be an accuracy parameter. Let $m$ be an integer that satisfies
+		$$
+		m \geq \frac{1}{\epsilon} \log(|\mathfrak{H}|/\delta).
+		$$ 	
+		Under the realizability assumption it holds that 
+		$$
+		\mathbb{P}_{S|_x \sim \mathcal{P}_x} \bigl( \{ R_\mathcal{P}(h_s) > \epsilon \}\bigr) \leq \delta.
+		$$
+		In other words, 
+		$$
+		R_\mathcal{P}(h_s) \leq \epsilon
+		$$
+		holds with probability of at least $1-\delta$ over the choice of the
+		training data $S|x$.
+	\end{coro}
+\section{Probably Approximately Correct Learning}
+    \begin{definition}
+		A hypothesis class $\mathfrak{H}$ is PAC learnable if there exist a
+		function $m_\mathfrak{H}: (0,1)^2 \to \mathbb{N}$ and a learning
+		algorithm with the following properties
+		\begin{itemize}
+			\item for every $(\epsilon, \delta) \in (0,1)$
+			\item for every distribution $\mathcal{P}_x$ over $\mathcal{X}$
+			\item for every labeling function $f: \mathcal{X} \to \{0,1\}$
+		\end{itemize}
+		if the realizability assumption holds, when running the learning
+		algorithm on $m \geq m_\mathfrak{H}(\delta, \epsilon)$ i.i.d. samples
+		generated by $\mathcal{D}$ and labeled by $f$, the algorithm returns a
+		hypothesis $h$ such that 
+		$$
+		R_\mathcal{P}(h) \leq \epsilon
+		$$ 
+		with probability of at least $1-\delta$ over the choice of the samples.
+	\end{definition}
+
+    \begin{definition}[samples complexity]
+		The sample complexity of leaning a hypothesis class $\mathfrak{H}$ is
+		the minimal integer that satisfies the requirement of PAC learnability
+		with accuracy $\epsilon$ and confidence $\delta$.
+	\end{definition}
+	\begin{coro}
+		Every finite hypothesis calss is PAC learnable with sample complexity 
+		$$
+		m \leq \lceil \frac{1}{\epsilon} \log(|\mathfrak{H}|/\delta) \rceil
+		$$
+	\end{coro}
+Are there classes that are infinite but nevertheless PAC learnable? How to
+characterize such classes?
+
