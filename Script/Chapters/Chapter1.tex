@@ -20,7 +20,7 @@ classifying hand-written digits. In these two examples we identify and
 familiarize ourselves with the main components of learning algorithms;
 \emph{datasets}, \emph{a hypothesis class}, and \emph{optimization algorithms}.
 We further identify important aspects of supervised learning algorithms, such as
-overfitting, and underfitting. Finally, we motivate in these two examples
+overfitting, and underfitting. Finally, we motivate in these examples, two
 problems at the forefront of research in mathematical machine learning, namely
 \emph{the curse of dimensionality (CoD)} and \emph{double/multiple descent phenomenon}. 
  
@@ -36,7 +36,7 @@ learning task is called a \emph{classification task}. If the target can take
 infinitely many values, the learning task is called a \emph{regression task}.  
 Supervised learning problems are approached by first choosing a \emph{hypothesis
 space} $\mathfrak{H}$, in which one looks for an approximation to the unknown function $f$. For example, if the data $x$ is one-dimensional and the target
-take values in $\mathbb{R}$ one can define the hypothesis class to be the set of
+takes values in $\mathbb{R}$ one can define the hypothesis class to be the set of
 all affine mappings, i.e., 
 \begin{equation}
     \label{eq:affine_mappings}
@@ -44,16 +44,16 @@ all affine mappings, i.e.,
 \bigr\}.
 \end{equation}
 
-Then, one define a loss function $l$ that measures how well a hypothesis
+Then, one can define a loss function $l$ that measures how well a hypothesis
 function $h$ approximates an unknown function $f$ at a point $x$. Using the
 dataset $D$, the supervised learning
-problem can be then formulated as an optimization problem 
+problem can then be formulated as an optimization problem 
 \begin{equation}
-    \min_{h \in \frak{H}} \frac{1}{N}\sum_{i=1}^{N}l(h(x_i), y_i).
+    \min_{h \in \mathfrak{H}} \frac{1}{N}\sum_{i=1}^{N}l(h(x_i), y_i).
 \end{equation}
 
-While there are many alternatives to solve these optimization problems, the
-by-far most used algorithms are variants of the gradient-descent algorithm. 
+While there are many alternatives to solve this optimization problem,
+by-far the most used algorithms are variants of the gradient-descent algorithm. 
 
 Let's look at some concrete examples. 
 
@@ -66,7 +66,7 @@ Let's look at some concrete examples.
     f(x) = x^2 \cos(5x) \exp(-x).
     $$ 
     Assume that the dataset is corrupted by Gaussian noise.
-    To learn a function $h$ that approximates $f$ let your hypothesis class be
+    To learn a function $h$ that approximates $f$, let your hypothesis class be
     the class of affine functions \eqref{eq:affine_mappings}. Let the loss
     function be the absolute error, i.e., 
     \begin{align*}
@@ -133,7 +133,7 @@ Let's look at some concrete examples.
     $c$-th entry of the one-hot vector representation of the target.
 
     Compute the training and test errors and study how they change when changing
-    the number hidden units or number of layers.
+    the number of hidden units or the number of layers.
 \end{boxedexample}
   
 \autoref{fig:regression} shows two hypotheses, one linear and one nonlinear, that we learned to fit the data in
@@ -144,11 +144,11 @@ minima of the target function. In these regions, it is optimized to fit the
 noise. The outcome of such a result is that the polynomial-regression model will
 fail to generalize well in these regions, i.e., it will have large error on
 unseen data in these regions. This is called \emph{overfitting}.
-On the other hand, the linear-regression model produces largely deviated from
+On the other hand, the linear-regression model produces largely deviated results from
 the data everywhere, and would, hence, also generalizes badly to unseen data.
 This is called an \emph{underfitting} phenomenon. 
 
-Think about the influence of the following factor on the underfitting and
+Think about the influence of the following factors on the underfitting and
 overfitting:
 \begin{itemize}
     \item Complexity of the model. For a polynomial-regression model this can be
@@ -166,15 +166,15 @@ In \autoref{ex:classification} and \autoref{ex:regression} we saw that a model
 trained on a certain dataset $D_{\text{train}}$ is expected to generalize well on \emph{unseen}
 data. This is a crucial difference from standard interpolation paradigms.
 Formally, the training data is assumed to follow an unknown probability
-distribution $P$, i.e., $D \sim P$. It is very desirable that the learned model
+distribution $P$, i.e., $D \sim P$. It is desirable that the learned model
 not only performs well on $D$, but also on any other dataset $D_\text{test}$ that
 also follows the distribution $P$. The problem is somehow ill-posed; \emph{how can one
 fit a model to a training data $D$ and expect it to perform well on unseen data
 $D_{\text{test}}$?}
 
-One strategy to tackle this questions is \emph{via} induction principle.
+One strategy to tackle this question is \emph{via} induction principle.
 Formally, obtaining a hypothesis that minimizes the error over the whole
-distribution, also knows as the \emph{true risk}, is impossible. Instead, one
+distribution, also known as the \emph{true risk}, is impossible. Instead, one
 can do the next best thing. This is formally done by deriving an upper bound of
 the true risk that includes, among other terms, the empirical risk, i.e., the
 loss on the training data. Other terms include the so-called \emph{Rademacher
@@ -188,10 +188,10 @@ functions, i.e., to add some terms, whose minimization reduces the complexity of
 the hypothesis class. This is directly linked to our previous discussion on
 overfitting. 
 
-The topic will be discussed in more detail in \autoref{Chapter2}.
+The topic will be discussed in more detail in chapter 2.
 
 \subsection{Hypothesis Classes and Approximation Capabilities}
-In \autoref{ex:regression} and \autoref{ex:classification} we have seen some
+In \autoref{ex:regression} and \autoref{ex:classification}, we have seen some
 examples of hypothesis classes, such as the class of all affine mappings, the
 class of polynomials up to a predefined degree, and the class of single-layer
 neural networks. Another major hypothesis class is Kernel methods. Some
@@ -200,8 +200,8 @@ class do we use? Are we guaranteed to find an optimal solution in the chosen
 class? Can we increase accuracy simply by increasing the complexity of our
 class?
 
-In \autoref{Chapter3} we study two important classes of models, neural networks
-and kernel methods. We survey some approximation properties of these classes and
+In chapter 3 we will study two important classes of models, neural networks
+and kernel methods. We will survey some approximation properties of these classes and
 perform error analysis for approximating important functions, such as continuous
 functions, $L^p-$ functions and Sobolev functions. 
 
@@ -212,8 +212,8 @@ such as image recognition, and natural language processing.
 Assume that we want to optimize a potentially multi-variate unknown function $f:
 \mathbb{R}^d \to \mathbb{R}$ using a dataset of
 points sampled from it. Let $d=1$, i.e., assume for now that $f$ is uni-variate
-and let our hypothesis class be a linear class. Denote by the $T$ the
-computational costs of needed to achieve a certain accuracy $\epsilon$. It turns
+and let our hypothesis class be a linear class. Let us denote by $T$ the
+computational costs needed to achieve a certain accuracy $\epsilon$. It turns
 out that $T$ grows exponentially with respect to $d$. In other words, the
 computational costs required to achieve accuracy $\epsilon$ grow exponentially
 with the dimension of the problem. This is known as the \emph{Curse of
@@ -224,7 +224,7 @@ $\tilde{f}$, \emph{appriori} error estimates are often given by
 \begin{equation*}
     \|f - \tilde{f}\| \leq c(d) \|f\|
 \end{equation*}
-where $\|.\|$ denotes some Sobolev norm of interest, and $c(d)$ is constant that
+where $\|.\|$ denotes some Sobolev norm of interest, and $c(d)$ is a constant that
 scales exponentially with the dimension of the problem. See, for example, error
 bounds for approximating Schwartz functions in the linear span of Hermite
 functions~\cite{Lubich:QCMD}. 
@@ -239,7 +239,7 @@ polynomial-regression model as a hypothesis class. What is the degree of the
 polynomial necessary to achieve a training set error less than $10^{-5}$.
 Similarly, study the same issue for fitting a dataset generated from the 2-dimensional target function
 \begin{equation*}
-    f(x) = \cos(2x y) \exp(-x).
+    f(x,y) = \cos(2x y) \exp(-x).
 \end{equation*}
 \end{boxedexample}
 
@@ -289,7 +289,7 @@ phenomenon. In other words, the computational scaling for using them to achieve
 a certain accuracy on a given task do not scale dramatically with the dimension
 of the problem. Characterizing such cases and providing rigorous understanding of
 this is a crucial point in modern mathematical machine learning. We will touch
-on this topic in \autoref{Chapter4}. Moreover, this topic will be of major
+on this topic in chapter 4. Moreover, this topic will be of major
 interest to us when considering physics-informed neural networks. 
 
 \subsection{Approximating Highly-Oscillatory Functions}
@@ -316,7 +316,7 @@ calculations see~\cite{Saleh:arXiv2308}.
     \caption{The relative accuracy of the approximate first 100 eigenvalues of the vibrational Schrödinger equation for H$_2$S as a function of the truncation parameter $N$.}
     \label{fig:osc}
 \end{figure}   
-We will see in \autoref{Chapter4} that neural-network approximation methods can
+We will see in chapter 4 that neural-network approximation methods can
 significantly improve approximation capabilities for highly-oscillatory functions.
 \subsection{Validity of Occam's Razor and the Overparametrized Regime}
 Theoretical and empirical results have demonstrated in the past 40 years that
@@ -338,7 +338,7 @@ The field of mathematical machine learning is huge and spans many standard
 mathematical areas, ranging from (geometric) measure theory to statistical
 learning theory, optimization theory and functional analysis. It is hence very
 challenging to cover all topics in a master course. Here is a list of topics
-that we do very little to cover in this course and some references for
+that we do not cover in detail in this course and some references for
 self-study. 
 
 \begin{itemize}
@@ -353,13 +353,13 @@ self-study.
 %----------------------------------------------------------------------------------------
 
 \section*{Wait! What is what?}
-Here is a list of questions that help you check your understanding of key
-concepts inside this chapter.
+Here is a list of questions that can help you check your understanding of key
+concepts in this chapter.
 
 \begin{enumerate}
     \item What are some examples of hypothesis classes? Which of them are
-    linear, resp. nonlinear, approximation methods?
-    \item What loss functions do you know for regression, resp. classification
+    linear or nonlinear approximation methods?
+    \item What loss functions do you know for regression and classification
     tasks? Can you think of other examples than the ones mentioned in this
     chapter?
     \item For a fitting problem, can we get more accurate results by increasing
