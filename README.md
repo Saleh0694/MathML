@@ -4,6 +4,8 @@ The repository contains material as lecture notes for a university course on "Ma
 
 The focus of the course is on some mathematical topics in modern machine learning, such as the curse of dimensionality. The script is accompanied by a computational lab, i.e., a collections of programming notebooks that exemplify problems mentioned in the script. 
 
+**The script is under ongoing development. Please consider it as a draft for now**.
+
 ## Installation  
 To use the computational lab make sure you have python, and jupyter notebook installed on your computer. To install all the required packages run
 ```
