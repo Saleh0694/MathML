@@ -16,8 +16,7 @@ and show that they do not overfit. This result will also motivate a famous
 notion of statistical learning, that of \emph{probably approximately correct
 (PAC)} learning. However, finiteness of the hypothesis class is, indeed, a very
 restricting condition. We will look at infinite classes that do not lead to
-overfitting and then characterize PAC learnability. The reader is referred to
-[] for more details. 
+overfitting and then characterize PAC learnability. The reader is referred to~\cite{Shalev:ML:2014} for more details. 
 
 We start this section by recalling some basic definitions of probability
 measure theory.
@@ -31,18 +30,18 @@ $A$ s.t. $\mathbb{P}(A)=1$ is said to happen \emph{almost surley.}
 
 Important probability measures are those induced by measurable transformations in the following way. 
 \begin{definition}[Push-forward measure]
-	Given a measure space $(\Omega, \mathcal{A}, \mathbb{P})$ and a measurable mapping $h:\Omega \to \Omega$ 
-	the \emph{push-forward measure of $\lambda$} is 
+	Given two measurable spaces $(\Omega_1, \mathcal{A}_1)$, $(\Omega_2, \mathcal{A}_2)$ and a measurable mapping $h:\Omega_1 \to \Omega_2$ 
+	the \emph{push-forward measure} of a measure $\mathbb{P}$ on $(\Omega_1, \mathcal{A}_1)$ is 
 	$$
-	h_\#\lambda (A) = \lambda (h^{-1}(A)) \quad  \forall A \in \mathcal{A}.
+	h_\#\mathbb{P} (A) := \mathbb{P} (h^{-1}(A)) \quad  \forall A \in \mathcal{A}_2.
 	$$
-	The push-forward measure is sometimes denoted by $\lambda h^{-1}$.
+	The push-forward measure is sometimes denoted by $\mathbb{P} h^{-1}$.
 \end{definition}
 
 We look now at a special kind of measurable mappings and the measures they induce.
 \begin{definition}[Real Random Variables and Distributions]
 	\label{def:RV}
-	\begin{enumerate}[(i)]
+	\begin{enumerate}[(i)] Let $(\Omega,\mathcal{A}, \mathbb{P})$ be a probability measure space.
 		\item A measurable mapping $V: \Omega \to \mathbb{R}$ is called a \emph{real random variable}.
 		\item The push-forward measure $P_V := V_\# \mathbb{P}$ induced by a real random variable $V$ 
 		is called the \emph{distribution of $V$}.		
@@ -52,10 +51,21 @@ We look now at a special kind of measurable mappings and the measures they induc
 
 \begin{definition}[Independent events]
 Two events $A,B$ are said to be \emph{independent} if $$\mathbb{P}(A \cap B) = \mathbb{P}(A)\mathbb{P}(B).$$ Given 
-an index set $I$, a family $(A_i)_{i \in I}$ of events is said to be \emph{independent}
+an index set $I$, consider the family $A_i \in \mathcal{A}$ for $i \in I$. The
+family $(A_i)_{i\in I}$ of events is said to be \emph{independent}
 if $$\mathbb{P}(\cap_{j \in J} A_j) = \prod_{j \in J} \mathbb{P}(A_j) \quad \forall J \subset I.$$	
 \end{definition}
 
+The independence of events (i.e., sets) can be generalized to independence of
+families of sets. 
+\begin{definition}[Independence of families of sets]
+        Let $I$ be an index set and consider $\mathcal{E}_i \subseteq \mathcal{A}$ for all $i \in I$.
+        The family $(\mathcal{E}_i)_{i \in I}$ is called \emph{independent} if, for any finite subset 
+        $J \in I$ and any choice of $E_j \in \mathcal{E}_j, j \in J$, one has 
+        $$
+        \mathbb{P}(\cap_{j \in J} E_j) = \prod_{j \in J} \mathbb{P}(E_j).
+        $$
+\end{definition}
 The following is an important family of random variables that one often encounters 
 in machine learning and statistics. 
 \begin{definition}[Independent and identically distributed random variables]
@@ -206,4 +216,13 @@ there exists $h^* \in \mathfrak{H}$ s.t. $R_{\mathcal{P}_z}(h^*) = 0$.
 	\end{coro}
 Are there classes that are infinite but nevertheless PAC learnable? How to
 characterize such classes?
+
+
+\section*{Wait! What is what?}
+Here is a list of questions that help you check your understanding of key
+concepts inside this chapter.
+
+\begin{enumerate}
+    \item tba. 
+\end{enumerate}
 
