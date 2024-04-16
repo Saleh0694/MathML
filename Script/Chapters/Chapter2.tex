@@ -12,20 +12,19 @@ hypothesis classes that do not overfit.
 
 We will see in this chapter that restricting the hypothesis classes can help
 reduce the overfitting. First, we start by looking at finite hypothesis classes
-and show that they do not overfit. This result will also motivate a famous
-notion of statistical learning, that of \emph{probably approximately correct
+and show that they do not overfit. This result will also motivate a notion of statistical learning, that of \emph{probably approximately correct
 (PAC)} learning. However, finiteness of the hypothesis class is, indeed, a very
 restricting condition. We will look at infinite classes that do not lead to
 overfitting and then characterize PAC learnability. In particular, we will
 define the so-called \emph{VC-dimension} of a hypothesis class and show that
 this property is sufficient and necessary for PAC learnability.
 
-The reader is referred to~\cite{Shalev:ML:2014} and ~\cite{Shapire:ThML2019} for more details. 
+The reader is referred to~\cite{Shalev:ML:2014} and~\cite{Shapire:ThML2019} for more details. 
 
 We start this section by recalling some basic definitions of probability
 measure theory.
 \section{Probability Measure Theory}
-As we have seen in \autoref{Chapter1}, training datasets are treated as random
+As we have seen in \nameref{Chapter1}, training datasets are treated as random
 variables. This makes the following tools from probability theory essential. 
 
 Let $(\Omega,\mathcal{A}, \mathbb{P})$ be a probability measure space, where $\Omega \subseteq \mathbb{R}$. 
@@ -33,9 +32,9 @@ It is common to refer to any $A \in \mathcal{A}$ by an \emph{event}. An event
 $A$ s.t. $\mathbb{P}(A)=1$ is said to happen \emph{almost surley.}
 
 Important probability measures are those induced by measurable transformations in the following way. 
-\begin{definition}[Push-forward measure]
+\begin{definition}[Push-forward Measure]
 	Given two measurable spaces $(\Omega_1, \mathcal{A}_1)$, $(\Omega_2, \mathcal{A}_2)$ and a measurable mapping $h:\Omega_1 \to \Omega_2$ 
-	the \emph{push-forward measure} of a measure $\mathbb{P}$ on $(\Omega_1, \mathcal{A}_1)$ is 
+	the \emph{push-forward measure} of a measure $\mathbb{P}$ on $(\Omega_2, \mathcal{A}_2)$ is 
 	$$
 	h_\#\mathbb{P} (A) := \mathbb{P} (h^{-1}(A)) \quad  \forall A \in \mathcal{A}_2.
 	$$
@@ -48,13 +47,16 @@ We look now at a special kind of measurable mappings and the measures they induc
 	\begin{enumerate}[(i)] Let $(\Omega,\mathcal{A}, \mathbb{P})$ be a probability measure space.
 		\item A measurable mapping $V: \Omega \to \mathbb{R}$ is called a \emph{real random variable}.
 		\item The push-forward measure $\mathcal{P}_V := V_\# \mathbb{P}$ induced by a real random variable $V$ 
-		is called the \emph{distribution of $V$}.		
+		is called the \emph{(probability) distribution of $V$}.		
 	\end{enumerate}
 \end{definition}
-
+A mapping $V: \Omega \to \mathbb{R}^n$ for $n>1$ is usually referred to as a
+\emph{random vector}. In our treatment we will refer to $V$ by a random variable
+for any $n\geq 1$. 
 \begin{definition}[Expected Value]
 	\begin{itemize}
-		\item The expected value $\mathbb{E}$ of a random variable $X: \Omega \to \mathbb{R}$
+		\item The expected value of a random variable $X: \Omega \to
+		\mathbb{R}$, denoted by $\mathbb{E}[X]$
 		is defined as:
 		\begin{align*}
 			\mathbb{E}[X] &:= \int_\Omega X(\omega) \ d\mathbb{P}(\omega) \\
@@ -62,18 +64,18 @@ We look now at a special kind of measurable mappings and the measures they induc
 		\end{align*}
 		where $\mathcal{P}_X$ is the pushforward-measure of $X$.
 		\item Similarly, the expected value of a measurable mapping $g:
-		\mathbb{R}\to \mathbb{R}$ is given by 
+		\mathbb{R}\to \mathbb{R}$ as a function of the random variable $X$ is given by 
 		\begin{align*}
 			\mathbb{E}[g(X)] &:= \int_\Omega g(X)(\omega) \ d\mathbb{P}(\omega) \\
 			& = \int_\mathbb{R} g(x) \ d\mathcal{P}_X(\omega).
 		\end{align*}
+		Sometimes, one writes $\mathbb{E}[g] = \mathbb{E}_{x \sim \mathcal{P}_x}[g]$
+		to highlight the measure on $\mathbb{R}$ against which one integrates.
 	\end{itemize}
-	Sometimes, one write $\mathbb{E}[g] = \mathbb{E}_{x \sim \mathcal{P}_x}[g]$
-	to highlight the measure on $\mathbb{R}$ against which one integrates.
 \end{definition}
 
 
-\begin{definition}[Independent events]
+\begin{definition}[Independent Events]
 Two events $A,B$ are said to be \emph{independent} if $$\mathbb{P}(A \cap B) = \mathbb{P}(A)\mathbb{P}(B).$$ Given 
 an index set $I$, consider the family $A_i \in \mathcal{A}$ for $i \in I$. The
 family $(A_i)_{i\in I}$ of events is said to be \emph{independent}
@@ -82,7 +84,7 @@ if $$\mathbb{P}(\cap_{j \in J} A_j) = \prod_{j \in J} \mathbb{P}(A_j) \quad \for
 
 The independence of events (i.e., sets) can be generalized to independence of
 families of sets. 
-\begin{definition}[Independence of families of sets]
+\begin{definition}[Independence of Families of Sets]
         Let $I$ be an index set and consider $\mathcal{E}_i \subseteq \mathcal{A}$ for all $i \in I$.
         The family $(\mathcal{E}_i)_{i \in I}$ is called \emph{independent} if, for any finite subset 
         $J \in I$ and any choice of $E_j \in \mathcal{E}_j, j \in J$, one has 
@@ -92,18 +94,19 @@ families of sets.
 \end{definition}
 The following is an important family of random variables that one often encounters 
 in machine learning and statistics. 
-\begin{definition}[Independent and identically distributed random variables]
+\begin{definition}[Independent and Identically Distributed Random Variables]
 	\label{def:iid}
 	Let $I$ be an index set and $(V_i)_{i \in I}$ be a family of real random 
-	variables. Endow $\mathbb{R}$ with the Borel-$\sigma$ algebra $\mathcal{B}$.
+	variables. Endow $\mathbb{R}$ with the Borel $\sigma$-algebra $\mathcal{B}$.
 	\begin{enumerate}[(i)]
 		\item The family $(V_i)_{i \in I}$ is said to be \emph{identically distributed} if 
 		$$\mathcal{P}_{V_i} = \mathcal{P}_{V_j} \quad \forall i, j \in I.$$
 		\item The family $(V_i)_{i \in I}$ is said to be \emph{independent} if the 
-		family of generated sigma algebras $(\sigma(V_i))_{i\in I}$, where 
+		family of generated $\sigma$-algebras $\bigl(\sigma(V_i) \bigr)_{i\in I}$, where 
 		$\sigma(V_i) = V_i^{-1}(\mathcal{B})$ is independent.
 	\end{enumerate}
-A family of real random variables satisfying both conditions is said to be \emph{i.i.d.}
+A family of real random variables satisfying both conditions is said to be
+\emph{independent and identically distributed (i.i.d.)}
 In such a case set $\mathcal{P} = \mathcal{P}_{V_i}$. \end{definition}
 
 \section{Probably Approximately Correct Learning}
