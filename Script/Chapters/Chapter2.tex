@@ -16,7 +16,11 @@ and show that they do not overfit. This result will also motivate a famous
 notion of statistical learning, that of \emph{probably approximately correct
 (PAC)} learning. However, finiteness of the hypothesis class is, indeed, a very
 restricting condition. We will look at infinite classes that do not lead to
-overfitting and then characterize PAC learnability. The reader is referred to~\cite{Shalev:ML:2014} for more details. 
+overfitting and then characterize PAC learnability. In particular, we will
+define the so-called \emph{VC-dimension} of a hypothesis class and show that
+this property is sufficient and necessary for PAC learnability.
+
+The reader is referred to~\cite{Shalev:ML:2014} and ~\cite{Shapire:ThML2019} for more details. 
 
 We start this section by recalling some basic definitions of probability
 measure theory.
@@ -43,9 +47,29 @@ We look now at a special kind of measurable mappings and the measures they induc
 	\label{def:RV}
 	\begin{enumerate}[(i)] Let $(\Omega,\mathcal{A}, \mathbb{P})$ be a probability measure space.
 		\item A measurable mapping $V: \Omega \to \mathbb{R}$ is called a \emph{real random variable}.
-		\item The push-forward measure $P_V := V_\# \mathbb{P}$ induced by a real random variable $V$ 
+		\item The push-forward measure $\mathcal{P}_V := V_\# \mathbb{P}$ induced by a real random variable $V$ 
 		is called the \emph{distribution of $V$}.		
 	\end{enumerate}
+\end{definition}
+
+\begin{definition}[Expected Value]
+	\begin{itemize}
+		\item The expected value $\mathbb{E}$ of a random variable $X: \Omega \to \mathbb{R}$
+		is defined as:
+		\begin{align*}
+			\mathbb{E}[X] &:= \int_\Omega X(\omega) \ d\mathbb{P}(\omega) \\
+			& = \int_\mathbb{R} x \ d\mathcal{P}_X(\omega),
+		\end{align*}
+		where $\mathcal{P}_X$ is the pushforward-measure of $X$.
+		\item Similarly, the expected value of a measurable mapping $g:
+		\mathbb{R}\to \mathbb{R}$ is given by 
+		\begin{align*}
+			\mathbb{E}[g(X)] &:= \int_\Omega g(X)(\omega) \ d\mathbb{P}(\omega) \\
+			& = \int_\mathbb{R} g(x) \ d\mathcal{P}_X(\omega).
+		\end{align*}
+	\end{itemize}
+	Sometimes, one write $\mathbb{E}[g] = \mathbb{E}_{x \sim \mathcal{P}_x}[g]$
+	to highlight the measure on $\mathbb{R}$ against which one integrates.
 \end{definition}
 
 
@@ -74,13 +98,13 @@ in machine learning and statistics.
 	variables. Endow $\mathbb{R}$ with the Borel-$\sigma$ algebra $\mathcal{B}$.
 	\begin{enumerate}[(i)]
 		\item The family $(V_i)_{i \in I}$ is said to be \emph{identically distributed} if 
-		$$P_{V_i} = P_{V_j} \quad \forall i, j \in I.$$
+		$$\mathcal{P}_{V_i} = \mathcal{P}_{V_j} \quad \forall i, j \in I.$$
 		\item The family $(V_i)_{i \in I}$ is said to be \emph{independent} if the 
 		family of generated sigma algebras $(\sigma(V_i))_{i\in I}$, where 
 		$\sigma(V_i) = V_i^{-1}(\mathcal{B})$ is independent.
 	\end{enumerate}
 A family of real random variables satisfying both conditions is said to be \emph{i.i.d.}
-In such a case set $P = P_{V_i}$. \end{definition}
+In such a case set $\mathcal{P} = \mathcal{P}_{V_i}$. \end{definition}
 
 \section{Probably Approximately Correct Learning}
 
@@ -103,13 +127,13 @@ algorithm is to solve
 \begin{equation*}
     \underbrace{R_{\mathcal{P}}(h) := \int_{\mathbb{Z}} l(y, h(x)) \ d \mathcal{P}}_{\text{True risk}} \longrightarrow \min_{h \in \mathfrak{H}} \implies h^\star, 
 \end{equation*}
-that is, to minimize the true risk. Note that the true risk is also called a
-generalization error. However, one only has access to a finite
+that is, to minimize the \emph{true risk}. Note that the true risk is also called the
+\emph{generalization error}. However, one only has access to a finite
 realiazation of the random vector $z$, i.e., to a training set $D=\{(x_i,
 y_i)_{i=1}^m\}$. A reasonable think to do is, hence, to minimize a
 finite/empirical representation of the true risk, i.e., to solve
 \begin{equation*}
-    \underbrace{\hat{R}_{\mathcal{P}} (h) := \sum_{(x,y) \in \hat{z}} \frac{1}{|\hat{z}|}l(y, h(x)) }_{\text{Empirical risk}} \longrightarrow \min_{h \in \mathfrak{H}} \implies \hat{h}^\star.
+    \underbrace{\hat{R}_{\mathcal{P}} (h) := \sum_{(x,y) \in D} \frac{1}{|D|}l(y, h(x)) }_{\text{Empirical risk}} \longrightarrow \min_{h \in \mathfrak{H}} \implies \hat{h}^\star.
 \end{equation*}
 
 A learning algorithm that replaces the original task of minimizing the true risk
@@ -118,17 +142,17 @@ is said to be using the \emph{ERM learning} rule.
 
 One of the main problems of statistical learning theories is to study the
 validity of approximating $h^*$ by $\hat{h}^*$. In particular, under what
-conditions on the hypothesis class does $\hat{h}^*$ have a small generalization error,
-i.e.? We
-will see that naively minimizing the loss function. 
-
+conditions on the hypothesis class does $\hat{h}^*$ have a small generalization error?
 In the next section, we will see that the finiteness of the hypothesis class is
-a sufficient condition to this end. 
+a sufficient condition to this end. Is it necessarily though?
+
 
 \subsection{Finite Hypothesis Classes do not Overfit}
-We start this section by defining the 0-1 loss for classification tasks:
+The goal in this section is to show that we won't encounter an overfitting
+problem if the hypothesis class has finitely many elements. However, our result
+will be limited to the  0-1 loss which we define as follows.
 \begin{equation*}
-    l(y, h(x)) =
+    l(y, h(x)) :=
     \begin{cases}
          & 1: \ h(x) \neq y \\
         & 0: \ \text{otherwise}.
@@ -142,10 +166,11 @@ $$
 \hat{R}_{\mathcal{P}}(h) = \frac{1}{m} | \{x: h(x) \neq y\} |
 $$
 
-Throughout we use the 
+Moreover, our analysis will only work under the  
  \emph{Realizability Assumption}, i.e., that
 there exists $h^* \in \mathfrak{H}$ s.t. $R_{\mathcal{P}_z}(h^*) = 0$.
 
+What does that mean for training data? tba.
     \begin{lemma}
 		Let $\mathfrak{H}$ be a finite hypothesis class, and $l$ be the 0-1 loss
 		function. Let $S|_x = (x_1, \dots, x_m)$ be a set of $m$ training points
@@ -159,7 +184,19 @@ there exists $h^* \in \mathfrak{H}$ s.t. $R_{\mathcal{P}_z}(h^*) = 0$.
 	obtaining a learner $h_s$ by the ERM rule that does not generalize well is
 	upperbounded by a finite quantity.
 \begin{proof}
-    tba.
+    We start by defining the set $\mathfrak{H}_b$ of bad hypotheses, i.e., the
+    set of all hypoehses that lead to a generalization error $> \epsilon$,
+    $$
+    \mathfrak{H}_b = \{h \in \mathfrak{H} \text{ s.t. } \mathbb{R}_\mathcal{P} (h) > \epsilon\}.
+    $$
+    Next, we define the set of misleading training data, i.e., the set of all
+    training datasets of cardinality $m$, on which there is at least one
+    hypothesis that produces zero training error and a generalization error $>
+    \epsilon$,
+    $$
+    M:= \{D|_x: \ |D|_x|=m, \text{ and s.t. there exists }h  \in \mathfrak{H}_b : \ R_\mathcal{P}(h)=0 \}.
+    $$
+    Note that the realizability assumption implies that $R_\mathcal{P}(\hat{h}^*)$
 \end{proof}
     \begin{coro}
 		\label{Coro:finite_hypo}
@@ -216,7 +253,10 @@ there exists $h^* \in \mathfrak{H}$ s.t. $R_{\mathcal{P}_z}(h^*) = 0$.
 	\end{coro}
 Are there classes that are infinite but nevertheless PAC learnable? How to
 characterize such classes?
-
+\subsection{Balancing training and test errors}
+$$
+	R_{\mathcal{P}_z}(\hat{h}^*) = \underbrace{\min_{h \in \mathfrak{H}} R_{\mathcal{P}_z}(h)}_{\text{approximation/training error}} + \underbrace{R_{\mathcal{P}_z}(\hat{h}^*) - \min_{h \in \mathfrak{H}} R_{\mathcal{P}_z}(h)}_{\text{estimation/test error}} 
+	$$
 
 \section*{Wait! What is what?}
 Here is a list of questions that help you check your understanding of key
