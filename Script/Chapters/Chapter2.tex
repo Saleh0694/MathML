@@ -60,14 +60,14 @@ for any $n\geq 1$.
 		is defined as:
 		\begin{align*}
 			\mathbb{E}[X] &:= \int_\Omega X(\omega) \ d\mathbb{P}(\omega) \\
-			& = \int_\mathbb{R} x \ d\mathcal{P}_X(\omega),
+			& = \int_\mathbb{R} x \ d\mathcal{P}_X(x),
 		\end{align*}
 		where $\mathcal{P}_X$ is the pushforward-measure of $X$.
 		\item Similarly, the expected value of a measurable mapping $g:
 		\mathbb{R}\to \mathbb{R}$ as a function of the random variable $X$ is given by 
 		\begin{align*}
 			\mathbb{E}[g(X)] &:= \int_\Omega g(X)(\omega) \ d\mathbb{P}(\omega) \\
-			& = \int_\mathbb{R} g(x) \ d\mathcal{P}_X(\omega).
+			& = \int_\mathbb{R} g(x) \ d\mathcal{P}_X(x).
 		\end{align*}
 		Sometimes, one writes $\mathbb{E}[g] = \mathbb{E}_{x \sim \mathcal{P}_x}[g]$
 		to highlight the measure on $\mathbb{R}$ against which one integrates.
@@ -100,13 +100,13 @@ in machine learning and statistics.
 	variables. Endow $\mathbb{R}$ with the Borel $\sigma$-algebra $\mathcal{B}$.
 	\begin{enumerate}[(i)]
 		\item The family $(V_i)_{i \in I}$ is said to be \emph{identically distributed} if 
-		$$\mathcal{P}_{V_i} = \mathcal{P}_{V_j} \quad \forall i, j \in I.$$
+		$$\mathcal{P}_{V_i} = \mathcal{P}_{V_j} \quad \text{ for all } i, j \in I.$$
 		\item The family $(V_i)_{i \in I}$ is said to be \emph{independent} if the 
 		family of generated $\sigma$-algebras $\bigl(\sigma(V_i) \bigr)_{i\in I}$, where 
 		$\sigma(V_i) = V_i^{-1}(\mathcal{B})$ is independent.
 	\end{enumerate}
 A family of real random variables satisfying both conditions is said to be
-\emph{independent and identically distributed (i.i.d.)}
+\emph{independent and identically distributed (i.i.d.)}.
 In such a case set $\mathcal{P} = \mathcal{P}_{V_i}$. \end{definition}
 
 \section{Probably Approximately Correct Learning}
@@ -117,22 +117,22 @@ finite classes do not overfit. Our results to this end motivate a notion of
 statistical learning that we discuss.
 
 \subsection{A Formal Setting of Learning}
-Let $z = (x, y)$ be a random vector where $x: \Omega \to \mathbb{R}^n$ and $y$
-is generated from $x$ by the functional relation $y=f(x)$, where $f: \mathbb{R}
+Let $z = (x, y)$ be a random variable where $x: \Omega \to \mathbb{X} \subseteq \mathbb{R}^n$ and $y$
+is generated from $x$ by the functional relation $y=f(x)$, where $f: \mathbb{X}
 \to \{0,1\}$, i.e., we restrict ourselves to the classification case. Denote by
 $\mathcal{P}$ the probability distribution of $z$ and by $\mathcal{P}_x$ the
-marginal probability distribution corresponding to the random vector $x$.
-Further, we set $\mathbb{Z} := \mathbb{R}^n \times \{0,1\}$ \footnote{Do not
+marginal probability distribution corresponding to the random variable $x$.
+Further, we set $\mathbb{Z} := \mathbb{X} \times \{0,1\}$ \footnote{Do not
 confuse the notation with the set of integers.}.
 
-Given a hypothesis class $\mathfrak{H}$  and a loss function $l$ the goal of a supervised-learning
+Given a hypothesis class $\mathfrak{H}$  and a loss function $l:\{0,1\}^2 \to \mathbb{R}_{>0}$, the goal of a supervised-learning
 algorithm is to solve 
 \begin{equation*}
     \underbrace{R_{\mathcal{P}}(h) := \int_{\mathbb{Z}} l(y, h(x)) \ d \mathcal{P}}_{\text{True risk}} \longrightarrow \min_{h \in \mathfrak{H}} \implies h^\star, 
 \end{equation*}
 that is, to minimize the \emph{true risk}. Note that the true risk is also called the
 \emph{generalization error}. However, one only has access to a finite
-realiazation of the random vector $z$, i.e., to a training set $D=\{(x_i,
+realiazation of the random variable $z$, i.e., to a training set $D=\{(x_i,
 y_i)_{i=1}^m\}$. A reasonable thing to do is, hence, to minimize a
 finite/empirical representation of the true risk, i.e., to solve
 \begin{equation*}
@@ -140,8 +140,10 @@ finite/empirical representation of the true risk, i.e., to solve
 \end{equation*}
 
 A learning algorithm that replaces the original task of minimizing the true risk
-by the task of minimizing the empirical risk is called an \emph{ERM learner} or
-is said to be using the \emph{ERM learning rule}. 
+by the task of minimizing the empirical risk is called an \emph{Empirical risk
+minimization (ERM) learner} or
+is said to be using the \emph{ERM learning rule}. To highlight the dependence of
+the empirical risk on the training data, we sometimes write $\hat{R}_{\mathcal{P}}(h;D)$.
 
 One of the main problems of statistical learning theories is to study the
 validity of approximating $h^*$ by $\hat{h}^*$. In particular, under what
@@ -149,7 +151,7 @@ conditions on the hypothesis class does $\hat{h}^*$ have a small generalization 
 In the next section, we will see that the finiteness of the hypothesis class is
 a sufficient condition to this end. Is it necessary though?
 
-Unless otherwise stated, we will set the loss function to be 0-1 loss which we define as follows.
+Unless otherwise stated, we will set the loss function to be the 0-1 loss which we define as follows.
 \begin{equation*}
     l(y, h(x)) :=
     \begin{cases}
@@ -167,29 +169,43 @@ $$
 
 Moreover, we restrict ourselves to working under the  
  \emph{Realizability Assumption}, i.e., that
-there exists $h^* \in \mathfrak{H}$ s.t. $R_{\mathcal{P}_z}(h^*) = 0$. Note that
+there exists $h^* \in \mathfrak{H}$ s.t. $R_{\mathcal{P}}(h^*) = 0$. Note that
 this assumption implies that the empirical risk of the hypothesis obtained by
 the ERM rule is zero, i.e., $\hat{R}(\hat{h}^*) = 0$ with probability 1 over the
-choice of the training data.
+choice of the training data. In other words, the realizability assumption
+implies that the ERM rule provides a hypothesis that is \emph{consistent} on the
+training data. To see this, note that $R_\mathcal{P}(h^*)=0$ implies
+that $\hat{R}_\mathcal{P}(h^*;D)=0$ with probability 1 over the choice of a
+dataset $D$ that is i.i.d. generated by $\mathcal{P}$. In turn, this implies
+that $\hat{R}_\mathcal{P}(\hat{h}^*;D)=0$ with probability 1 over the choice of
+$D$ since $\hat{R}_\mathcal{P}(\hat{h}^*;D) \leq \hat{R}_\mathcal{P}(h^*;D)$ by
+the definition of the ERM rule.
 
 \subsection{Finite Hypothesis Classes do not Overfit}
 The goal in this section is to show that we won't encounter an overfitting
-problem if the hypothesis class has finitely many elements. 
+problem if the hypothesis class has finitely many elements. We will deal with
+the overfitting problem in an approximate manner, i.e., we will say that a
+hypothesis $h$ does not overfit if $R_\mathcal{P}(h)\leq \epsilon$ for some
+small $\epsilon>0$.
 
 In what follows, given a dataset $D$, we denote by $D|_x$ the input of the
-dataset, i.e., $D|_x=\{x_i: i=1,\dots,m\}$.
+dataset, i.e., $D|_x=\{x_i: i=1,\dots,m\}$. Note that since each $x\in D|_x$ is a
+random variable with a distribution $\mathcal{P}_x$, the dataset $D|_x$ has distribution $\mathcal{P}^m_x$ over $\mathbb{X}^m$.
 
 \begin{lemma}
 		Under the realizability assumption and
 		for accuracy $\epsilon >0$ it holds that 
 		$$
-		\mathcal{P}_x\bigl(\{S|_x: R_\mathcal{P}(\hat{h}^*) > \epsilon\} \bigr) \leq |\mathfrak{H}| e ^{-\epsilon m}.
+		\mathcal{P}^m_x\bigl(\{D|_x: R_\mathcal{P}(\hat{h}^*) > \epsilon\} \bigr) \leq |\mathfrak{H}| e ^{-\epsilon m}.
 		$$
 	\end{lemma}
 	In words; the probability of sampling $m$ training data points and
 	obtaining a learner $\hat{h}^*$ by the ERM rule that does not generalize well is
 	upperbounded. Note that this upperbound is finite if the cardinality of
-	$\frak{H}$ is finite.
+	$\frak{H}$ is finite. Also note that 
+	$$
+	\mathcal{P}^m_x\bigl(\{D|_x: R_\mathcal{P}(\hat{h}^*) > \epsilon\} = \mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl( \{ R_\mathcal{P}(\hat{h}^*) > \epsilon \}\bigr). 
+	$$
 \begin{proof}
     We start by defining the set $\mathfrak{H}_b$ of bad hypotheses, i.e., the
     set of all hypotheses that lead to a generalization error $> \epsilon$,
@@ -201,45 +217,66 @@ dataset, i.e., $D|_x=\{x_i: i=1,\dots,m\}$.
     hypothesis that produces zero training error and a generalization error $>
     \epsilon$,
     $$
-    M:= \{D|_x: \ |D|_x|=m, \text{ and s.t. there exists }h  \in \mathfrak{H}_b : \ R_\mathcal{P}(h)=0 \}.
+    M:= \{D|_x: \ |D|_x|=m, \text{ and s.t. there exists }h  \in \mathfrak{H}_b : \ \hat{R}_\mathcal{P}(h;D)=0 \}.
     $$
-    Note that the realizability assumption implies that $R_\mathcal{P}(\hat{h}^*)$
+    Note that the realizability assumption implies that
+    $\hat{R}_\mathcal{P}(\hat{h}^*)=0$ as discussed before. This in turn implies
+    that $\{D|_x: R_\mathcal{P}(\hat{h}^*) > \epsilon\} \subseteq M$. It thus
+    follows that 
+	\begin{align*}
+		\mathcal{P}^m_x\bigl(\{D|_x: R_\mathcal{P}(\hat{h}^*) > \epsilon\}\bigr) &\leq \mathcal{P}^m_x(M)\\
+		&\leq \sum_{h \in \mathfrak{H}_b} \mathcal{P}^m_x\bigl(\{D|_x: \hat{R}_\mathcal{P}(h;D)=0\}\bigr)\\
+		&\leq \sum_{h \in \mathfrak{H}_b} \prod_{i=1}^m \mathcal{P}_x\bigl(\{x: h(x) = y\}\bigr)\\
+		&= \sum_{h \in \mathfrak{H}_b} \prod_{i=1}^m (1-R_\mathcal{P}(h)) \quad {\color{mildred} \text{(definition of true risk)}}\\
+		&\leq \sum_{h \in \mathfrak{H}_b} (1-\epsilon)^m \quad {\color{mildred} \text{(since } h \in \mathfrak{H}_b)}\\
+		&\leq |\mathfrak{H}_b| (1-\epsilon)^m \\
+		&\leq |\mathfrak{H}| (1-\epsilon)^m \\
+		&\leq |\mathfrak{H}| e^{-\epsilon m}.
+	\end{align*}	
 \end{proof}
+The above lemma shows that the probability of overfitting is exponentially small
+with the size of the training data. This motivates the following corollary.
     \begin{coro}
 		\label{Coro:finite_hypo}
-		Let $\mathfrak{H}$ be a finite hypothesis class and $l$ be the 0-1 loss
-		function. Let $\delta \in (0,1)$ be a confidence parameter and $\epsilon \in
+		Let $\mathfrak{H}$ be a finite hypothesis class. Let $\delta \in (0,1)$ be a confidence parameter and $\epsilon \in
 		(0,1)$ be an accuracy parameter. Let $m$ be an integer that satisfies
 		$$
 		m \geq \frac{1}{\epsilon} \log(|\mathfrak{H}|/\delta).
 		$$ 	
 		Under the realizability assumption it holds that 
 		$$
-		\mathbb{P}_{S|_x \sim \mathcal{P}_x} \bigl( \{ R_\mathcal{P}(\hat{h}^*) > \epsilon \}\bigr) \leq \delta.
+		\mathbb{P}_{D|_x \sim \mathcal{P}_x} \bigl( \{ R_\mathcal{P}(\hat{h}^*) > \epsilon \}\bigr) \leq \delta.
 		$$
 		In other words, 
 		$$
 		R_\mathcal{P}(\hat{h}^*) \leq \epsilon
 		$$
 		holds with probability of at least $1-\delta$ over the choice of the
-		training data $S|x$.
+		training data $D|x$.
 	\end{coro}
+	Note that this result holds for any labeling function $f$ and any
+	distribution $\mathcal{P}_x$. 
     \begin{proof}
-        tba.
+        Follows straight-forwardly from the previous lemma.
     \end{proof}
-\section{Probably Approximately Correct Learning}
+The results we proved so far show that finite hypothesis classes do not overfit.
+Here, overfitting is defined in an approximate sense controlled by parameter
+$\epsilon$. The results also guarantee that the ERM rule provides a hypothesis
+that generalizes well in a probabilistic sense. The probability here is
+controlled by a parameter $\delta$. This motivates the following definition.
+
     \begin{definition}
 		A hypothesis class $\mathfrak{H}$ is PAC learnable if there exist a
 		function $m_\mathfrak{H}: (0,1)^2 \to \mathbb{N}$ and a learning
 		algorithm with the following properties
 		\begin{itemize}
 			\item for every $(\epsilon, \delta) \in (0,1)$
-			\item for every distribution $\mathcal{P}_x$ over $\mathcal{X}$
-			\item for every labeling function $f: \mathcal{X} \to \{0,1\}$
+			\item for every distribution $\mathcal{P}_x$ over $\mathbb{X}$
+			\item for every labeling function $f: \mathbb{X} \to \{0,1\}$
 		\end{itemize}
-		if the realizability assumption holds, when running the learning
+		s.t. if the realizability assumption holds, when running the learning
 		algorithm on $m \geq m_\mathfrak{H}(\delta, \epsilon)$ i.i.d. samples
-		generated by $\mathcal{D}$ and labeled by $f$, the algorithm returns a
+		generated by $\mathcal{P}_x$ and labeled by $f$, the algorithm returns a
 		hypothesis $h$ such that 
 		$$
 		R_\mathcal{P}(h) \leq \epsilon
@@ -252,14 +289,59 @@ dataset, i.e., $D|_x=\{x_i: i=1,\dots,m\}$.
 		the minimal integer that satisfies the requirement of PAC learnability
 		with accuracy $\epsilon$ and confidence $\delta$.
 	\end{definition}
+	With these definitions we can restate our corollary in the following manner.
 	\begin{coro}
 		Every finite hypothesis calss is PAC learnable with sample complexity 
 		$$
 		m \leq \lceil \frac{1}{\epsilon} \log(|\mathfrak{H}|/\delta) \rceil
 		$$
 	\end{coro}
-Are there classes that are infinite but nevertheless PAC learnable? How to
-characterize such classes?
+One may wonder whether the finiteness of the hypothesis class is a necessary
+condition for PAC learnability. We will see now that this is indeed not the
+case. For example, we consider here the class of threshold functions. 
+\begin{definition}[Class of Threshold Functions]
+	$\mathfrak{H} := \{h_a:\mathbb{R}, h_a(x)= \mathbf{1}_{x <a} \to \{0,1\},\  a\in \mathbb{R}\}$
+\end{definition}	
+In words, this class consists of all functions that assign 1 to all inputs that
+are smaller than a threshold $a$ and 0 otherwise. The class of threshold
+functions has infinite cardinality. However, we will see that this class is PAC learnable.
+\begin{lemma}
+The class of threshold functions	$\mathfrak{H}$ is PAC-learnable using the ERM rule with sample complexity of
+	$m_\frak{H} \leq \lceil \frac{1}{\epsilon}\log (2/\delta)\rceil$.
+\end{lemma}
+\begin{proof}
+	It suffices to show that 
+	$$
+	\mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl( \{ R_\mathcal{P}(\hat{h}^*) > \epsilon \}\bigr) \leq 2 \exp(-\epsilon m).
+	$$
+	To prove this note that we work under the realizability assumption. Hence,
+	it is possible to find a hypothesis $\hat{h}^* = h_{\hat{a}^*}$ that is
+	consistent with the training data. 
+	
+	Let $a^*$ be the threshold of the labeling function $f$. Let $a^\star _r >a^*$ be such that $\mathbb{P}_{x \sim \mathcal{P}_x}\bigl(x \in (a^*,
+	\hat{a}^*_r)\bigr)= \epsilon$. Similarly, let $a^\star_l <a^*$ be such
+	that $\mathbb{P}_{x \sim \mathcal{P}_x}\bigl(x \in (\hat{a}^*_l, a^*)\bigr)=
+	\epsilon$. Notice that picking datapoints that are outside the interval
+	$(a^\star_l, a^\star_r)$ is a sufficient condition for picking training datasets that lead to a bad
+	hypothesis. Formally
+	\begin{align*} 
+	\mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl( \{ R_\mathcal{P}(\hat{h}^*) > \epsilon \}\bigr) &\leq \mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{\forall x \in D|_x,  x \notin (a^\star_l, a^\star) \vee x \notin (a^\star, a^\star_r)\}\bigr) \\
+	&\leq \underbrace{\mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{\forall x \in D|_x,  x \notin (a^\star_l, a^\star) \}\bigr)}_{\text{term} 1} + \mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{\forall x \in D|_x,  x \notin (a^\star, a^\star_r)\}\bigr). \\
+	\end{align*}
+	Note that 
+	\begin{align*}
+		\text{term }1 &\leq \mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{x_1 \notin (a^\star_l, a^\star) \wedge x_2 \notin (a^\star_l, a^\star) \wedge \dots \wedge x_m \notin (a^\star_l, a^\star) \}\bigr)\\
+		&= \prod_{i=1}^m \mathbb{P}_{x \sim \mathcal{P}_x} \bigl(x \notin (a^\star_l, a^\star)\bigr)\\
+		&= (1-\epsilon)^m.
+	\end{align*}
+	The claim follows by doing the same inequality for the second term and using $(1-\epsilon)^m \leq \exp(-\epsilon m)$.
+\end{proof}
+In summary, our results show that finiteness of the hypothesis class is not a
+good condition for characterizing PAC learnability, since infinite classes can
+be PAC learnable. We thus move in the next section to introduce a better measure
+of the complexity of a hypothesis class.
+
+\subsection{Vapnik-Chervonenkis Dimension}
 \subsection{Balancing training and test errors}
 $$
 	R_{\mathcal{P}_z}(\hat{h}^*) = \underbrace{\min_{h \in \mathfrak{H}} R_{\mathcal{P}_z}(h)}_{\text{approximation/training error}} + \underbrace{R_{\mathcal{P}_z}(\hat{h}^*) - \min_{h \in \mathfrak{H}} R_{\mathcal{P}_z}(h)}_{\text{estimation/test error}} 
