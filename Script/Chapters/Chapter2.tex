@@ -10,14 +10,15 @@ trained to minimize the empirical risk on a training dataset can still fail to g
 well over unseen dataset. A fundamental question in statistical learning theory is how to design
 hypothesis classes that do not overfit.  
 
-We will see in this chapter that restricting the hypothesis classes can help
+We will see in this chapter that restricting the complexity of the hypothesis classes can help
 reduce the overfitting. First, we start by looking at finite hypothesis classes
 and show that they do not overfit. This result will also motivate a notion of statistical learning, that of \emph{probably approximately correct
 (PAC)} learning. However, finiteness of the hypothesis class is, indeed, a very
-restricting condition. We will look at infinite classes that do not lead to
-overfitting and then characterize PAC learnability. In particular, we will
-define the so-called \emph{VC-dimension} of a hypothesis class and show that
-this property is sufficient and necessary for PAC learnability.
+restricting condition. We will discuss other measures of the complexity of a
+hypothesis class, such as the \emph{Vapnik-Chervonenkis (VC) dimension} and the
+\emph{Rademacher complexity}. At the end of this chapter, we will discuss what
+these theoretical results imply for the design of machine learning algorithms and
+link to the concept of \emph{overparameterization}, which is a hot topic in the field of deep learning.
 
 The reader is referred to~\cite{Shalev:ML:2014} and~\cite{Shapire:ThML2019} for more details. 
 
@@ -109,23 +110,23 @@ A family of real random variables satisfying both conditions is said to be
 \emph{independent and identically distributed (i.i.d.)}.
 In such a case set $\mathcal{P} = \mathcal{P}_{V_i}$. \end{definition}
 
-\section{Probably Approximately Correct Learning}
+\section{A Formal Setting of Learning}
+\label{sec:formal_learning}
+We start by defining the standard setting of supervised learning. In our
+treatment, we will not use this very general setting. We will be imposing restrictions, for
+example, by considering only binary classification problems, or by using special
+loss functions. Nevertheless, it is useful to see the general setting first.
 
-We start this chapter by formalizing the setting of learning and the problem of
-overfitting. We then look closely at the problem of overfitting and show that
-finite classes do not overfit. Our results to this end motivate a notion of
-statistical learning that we discuss.
-
-\subsection{A Formal Setting of Learning}
-Let $z = (x, y)$ be a random variable where $x: \Omega \to \mathbb{X} \subseteq \mathbb{R}^n$ and $y$
-is generated from $x$ by the functional relation $y=f(x)$, where $f: \mathbb{X}
-\to \{0,1\}$, i.e., we restrict ourselves to the classification case. Denote by
+Let $z = (x, y)$ be a random variable where $x: \Omega \to \mathbb{X} \subseteq
+\mathbb{R}^n$ and $y: \Omega \to \mathbb{Y} \subset \mathbb{R}$. Denote by
 $\mathcal{P}$ the probability distribution of $z$ and by $\mathcal{P}_x$ the
 marginal probability distribution corresponding to the random variable $x$.
-Further, we set $\mathbb{Z} := \mathbb{X} \times \{0,1\}$ \footnote{Do not
-confuse the notation with the set of integers.}.
+Further, we set $\mathbb{Z} := \mathbb{X} \times \mathbb{Y}$ \footnote{Do not
+confuse the notation with the set of integers.}. We denote by $p(z)$ and $p(x)$
+the probability density functions of $z$ and $x$, respectively. These two
+densities are related by the formula $p(z) = p(x)p(y|x)$.
 
-Given a hypothesis class $\mathfrak{H}$  and a loss function $l:\{0,1\}^2 \to \mathbb{R}_{>0}$, the goal of a supervised-learning
+Given a hypothesis class $\mathfrak{H}$ of functions $h: \mathbb{X} \to \mathbb{Y}$ and a loss function $l:\mathbb{Y}^2 \to \mathbb{R}_{>0}$, the goal of a supervised-learning
 algorithm is to solve 
 \begin{equation*}
     \underbrace{R_{\mathcal{P}}(h) := \int_{\mathbb{Z}} l(y, h(x)) \ d \mathcal{P}}_{\text{True risk}} \longrightarrow \min_{h \in \mathfrak{H}} \implies h^\star, 
@@ -140,7 +141,7 @@ finite/empirical representation of the true risk, i.e., to solve
 \end{equation*}
 
 A learning algorithm that replaces the original task of minimizing the true risk
-by the task of minimizing the empirical risk is called an \emph{Empirical risk
+by the task of minimizing the empirical risk is called an \emph{empirical risk
 minimization (ERM) learner} or
 is said to be using the \emph{ERM learning rule}. To highlight the dependence of
 the empirical risk on the training data, we sometimes write $\hat{R}_{\mathcal{P}}(h;D)$.
@@ -151,7 +152,20 @@ conditions on the hypothesis class does $\hat{h}^*$ have a small generalization 
 In the next section, we will see that the finiteness of the hypothesis class is
 a sufficient condition to this end. Is it necessary though?
 
-Unless otherwise stated, we will set the loss function to be the 0-1 loss which we define as follows.
+\section{Probably Approximately Correct Learning}
+
+We start this section by looking closely at the problem of overfitting and show that
+finite classes do not overfit. Our results to this end motivate a notion of
+statistical learning that we discuss.
+
+For this section, we will adopt the setting defined in
+\autoref{sec:formal_learning} and further assume that $\mathbb{Y} = \{0,1\}$,
+i.e., we restrict ourselves to the binary classification case. Moreover, we
+assume that $y$
+is generated from $x$ by the deterministic functional relation $y=f(x)$, where $f: \mathbb{X}
+\to \{0,1\}$. Unless otherwise stated, we will set the loss function to be the 0-1 loss
+which
+we define as follows.
 \begin{equation*}
     l(y, h(x)) :=
     \begin{cases}
@@ -168,7 +182,7 @@ $$
 $$
 
 Moreover, we restrict ourselves to working under the  
- \emph{Realizability Assumption}, i.e., that
+ \emph{realizability assumption}, i.e., that
 there exists $h^* \in \mathfrak{H}$ s.t. $R_{\mathcal{P}}(h^*) = 0$. Note that
 this assumption implies that the empirical risk of the hypothesis obtained by
 the ERM rule is zero, i.e., $\hat{R}(\hat{h}^*) = 0$ with probability 1 over the
@@ -193,6 +207,7 @@ dataset, i.e., $D|_x=\{x_i: i=1,\dots,m\}$. Note that since each $x\in D|_x$ is 
 random variable with a distribution $\mathcal{P}_x$, the dataset $D|_x$ has distribution $\mathcal{P}^m_x$ over $\mathbb{X}^m$.
 
 \begin{lemma}
+	\label{lem:PAC_fh}
 		Under the realizability assumption and
 		for accuracy $\epsilon >0$ it holds that 
 		$$
@@ -210,7 +225,7 @@ random variable with a distribution $\mathcal{P}_x$, the dataset $D|_x$ has dist
     We start by defining the set $\mathfrak{H}_b$ of bad hypotheses, i.e., the
     set of all hypotheses that lead to a generalization error $> \epsilon$,
     $$
-    \mathfrak{H}_b = \{h \in \mathfrak{H} \text{ s.t. } \mathbb{R}_\mathcal{P} (h) > \epsilon\}.
+    \mathfrak{H}_b := \{h \in \mathfrak{H} \text{ s.t. } \mathbb{R}_\mathcal{P} (h) > \epsilon\}.
     $$
     Next, we define the set of misleading training data, i.e., the set of all
     training datasets of cardinality $m$, on which there is at least one
@@ -226,7 +241,7 @@ random variable with a distribution $\mathcal{P}_x$, the dataset $D|_x$ has dist
 	\begin{align*}
 		\mathcal{P}^m_x\bigl(\{D|_x: R_\mathcal{P}(\hat{h}^*) > \epsilon\}\bigr) &\leq \mathcal{P}^m_x(M)\\
 		&\leq \sum_{h \in \mathfrak{H}_b} \mathcal{P}^m_x\bigl(\{D|_x: \hat{R}_\mathcal{P}(h;D)=0\}\bigr)\\
-		&\leq \sum_{h \in \mathfrak{H}_b} \prod_{i=1}^m \mathcal{P}_x\bigl(\{x: h(x) = y\}\bigr)\\
+		&= \sum_{h \in \mathfrak{H}_b} \prod_{i=1}^m \mathcal{P}_x\bigl(\{x: h(x) = y\}\bigr)\\
 		&= \sum_{h \in \mathfrak{H}_b} \prod_{i=1}^m (1-R_\mathcal{P}(h)) \quad {\color{mildred} \text{(definition of true risk)}}\\
 		&\leq \sum_{h \in \mathfrak{H}_b} (1-\epsilon)^m \quad {\color{mildred} \text{(since } h \in \mathfrak{H}_b)}\\
 		&\leq |\mathfrak{H}_b| (1-\epsilon)^m \\
@@ -235,7 +250,8 @@ random variable with a distribution $\mathcal{P}_x$, the dataset $D|_x$ has dist
 	\end{align*}	
 \end{proof}
 The above lemma shows that the probability of overfitting is exponentially small
-with the size of the training data. This motivates the following corollary.
+with the size of the training data. It also provides us with a way to find the
+minimal amount of training data that guarantees a small generalization error.
     \begin{coro}
 		\label{Coro:finite_hypo}
 		Let $\mathfrak{H}$ be a finite hypothesis class. Let $\delta \in (0,1)$ be a confidence parameter and $\epsilon \in
@@ -245,14 +261,14 @@ with the size of the training data. This motivates the following corollary.
 		$$ 	
 		Under the realizability assumption it holds that 
 		$$
-		\mathbb{P}_{D|_x \sim \mathcal{P}_x} \bigl( \{ R_\mathcal{P}(\hat{h}^*) > \epsilon \}\bigr) \leq \delta.
+		\mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl( \{ R_\mathcal{P}(\hat{h}^*) > \epsilon \}\bigr) \leq \delta.
 		$$
 		In other words, 
 		$$
 		R_\mathcal{P}(\hat{h}^*) \leq \epsilon
 		$$
 		holds with probability of at least $1-\delta$ over the choice of the
-		training data $D|x$.
+		training data $D$.
 	\end{coro}
 	Note that this result holds for any labeling function $f$ and any
 	distribution $\mathcal{P}_x$. 
@@ -260,9 +276,9 @@ with the size of the training data. This motivates the following corollary.
         Follows straight-forwardly from the previous lemma.
     \end{proof}
 The results we proved so far show that finite hypothesis classes do not overfit.
-Here, overfitting is defined in an approximate sense controlled by parameter
-$\epsilon$. The results also guarantee that the ERM rule provides a hypothesis
-that generalizes well in a probabilistic sense. The probability here is
+Here, overfitting is defined in an \emph{approximate sense} controlled by parameter
+$\epsilon$. The results guarantee that the ERM rule provides a hypothesis
+that generalizes well in a \emph{probabilistic sense}. The probability here is
 controlled by a parameter $\delta$. This motivates the following definition.
 
     \begin{definition}
@@ -270,7 +286,7 @@ controlled by a parameter $\delta$. This motivates the following definition.
 		function $m_\mathfrak{H}: (0,1)^2 \to \mathbb{N}$ and a learning
 		algorithm with the following properties
 		\begin{itemize}
-			\item for every $(\epsilon, \delta) \in (0,1)$
+			\item for every $(\epsilon, \delta) \in (0,1)^2$
 			\item for every distribution $\mathcal{P}_x$ over $\mathbb{X}$
 			\item for every labeling function $f: \mathbb{X} \to \{0,1\}$
 		\end{itemize}
@@ -300,7 +316,7 @@ One may wonder whether the finiteness of the hypothesis class is a necessary
 condition for PAC learnability. We will see now that this is indeed not the
 case. For example, we consider here the class of threshold functions. 
 \begin{definition}[Class of Threshold Functions]
-	$\mathfrak{H} := \{h_a:\mathbb{R}, h_a(x)= \mathbf{1}_{x <a} \to \{0,1\},\  a\in \mathbb{R}\}$
+	$\mathfrak{H} := \{h_a:\mathbb{R}\to \{0,1\}, h_a(x)= \mathbf{1}_{x <a} ,\  a\in \mathbb{R}\}$
 \end{definition}	
 In words, this class consists of all functions that assign 1 to all inputs that
 are smaller than a threshold $a$ and 0 otherwise. The class of threshold
@@ -318,20 +334,20 @@ The class of threshold functions	$\mathfrak{H}$ is PAC-learnable using the ERM r
 	it is possible to find a hypothesis $\hat{h}^* = h_{\hat{a}^*}$ that is
 	consistent with the training data. 
 	
-	Let $a^*$ be the threshold of the labeling function $f$. Let $a^\star _r >a^*$ be such that $\mathbb{P}_{x \sim \mathcal{P}_x}\bigl(x \in (a^*,
-	\hat{a}^*_r)\bigr)= \epsilon$. Similarly, let $a^\star_l <a^*$ be such
+	Let $a^*$ be the threshold of the labeling function $f$. Let $a^* _r >a^*$ be such that $\mathbb{P}_{x \sim \mathcal{P}_x}\bigl(x \in (a^*,
+	\hat{a}^*_r)\bigr)= \epsilon$. Similarly, let $a^*_l <a^*$ be such
 	that $\mathbb{P}_{x \sim \mathcal{P}_x}\bigl(x \in (\hat{a}^*_l, a^*)\bigr)=
 	\epsilon$. Notice that picking datapoints that are outside the interval
-	$(a^\star_l, a^\star_r)$ is a sufficient condition for picking training datasets that lead to a bad
+	$(a^*_l, a^*)$ or outside $(a^*, a^*_r)$ is a sufficient condition for picking training datasets that lead to a bad
 	hypothesis. Formally
 	\begin{align*} 
-	\mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl( \{ R_\mathcal{P}(\hat{h}^*) > \epsilon \}\bigr) &\leq \mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{\forall x \in D|_x,  x \notin (a^\star_l, a^\star) \vee x \notin (a^\star, a^\star_r)\}\bigr) \\
-	&\leq \underbrace{\mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{\forall x \in D|_x,  x \notin (a^\star_l, a^\star) \}\bigr)}_{\text{term} 1} + \mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{\forall x \in D|_x,  x \notin (a^\star, a^\star_r)\}\bigr). \\
+	\mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl( \{ R_\mathcal{P}(\hat{h}^*) > \epsilon \}\bigr) &\leq \mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{\forall x \in D|_x,  x \notin (a^*_l, a^*) \vee x \notin (a^*, a^*_r)\}\bigr) \\
+	&\leq \underbrace{\mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{\forall x \in D|_x,  x \notin (a^*_l, a^*) \}\bigr)}_{\text{term} 1} + \mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{\forall x \in D|_x,  x \notin (a^*, a^*_r)\}\bigr). 
 	\end{align*}
 	Note that 
 	\begin{align*}
-		\text{term }1 &\leq \mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{x_1 \notin (a^\star_l, a^\star) \wedge x_2 \notin (a^\star_l, a^\star) \wedge \dots \wedge x_m \notin (a^\star_l, a^\star) \}\bigr)\\
-		&= \prod_{i=1}^m \mathbb{P}_{x \sim \mathcal{P}_x} \bigl(x \notin (a^\star_l, a^\star)\bigr)\\
+		\text{term }1 &\leq \mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl(\{x_1 \notin (a^*_l, a^*) \wedge x_2 \notin (a^*_l, a^*) \wedge \dots \wedge x_m \notin (a^*_l, a^*) \}\bigr)\\
+		&= \prod_{i=1}^m \mathbb{P}_{x \sim \mathcal{P}_x} \bigl(x \notin (a^*_l, a^*)\bigr)\\
 		&= (1-\epsilon)^m.
 	\end{align*}
 	The claim follows by doing the same inequality for the second term and using $(1-\epsilon)^m \leq \exp(-\epsilon m)$.
@@ -342,7 +358,353 @@ be PAC learnable. We thus move in the next section to introduce a better measure
 of the complexity of a hypothesis class.
 
 \subsection{Vapnik-Chervonenkis Dimension}
-\subsection{Balancing training and test errors}
+The Vapnik-Chervonenkis (VC) dimension is a measure of the complexity of a
+hypothesis class. The intuition behind this measure is to define the richness of
+a class with respect to a given dataset. For example, a class of threshold
+functions is infinite dimensional. However, given a dataset $D$ of only one
+point $x \in \mathbb{R}$, the whole class of threshold functions can give this
+datapoint only two
+different values, either 0 if the hypothesis has a threshold lying to the
+left of the datapoint, or 1 otherwise. Now consider a dataset
+of two points. The class of threshold functions can label these two points in three
+different ways, (0,0), (1,0) or (1,1). However, the hypothesis class of threshold
+functions cannot represent the labeling (0,1). Hence, the class of threshold
+functions cannot exhaust all the possible labeling of a dataset of two
+points. This is indeed the motivation behind the following definitions.
+
+\begin{definition}[Restriction of $\mathfrak{H}$ to $C$]
+	Let $\frak{H}$ be a class of functions from $\mathbb{X}$ to $\{0,1\}$
+	and let $C = \{x_1, \dots, x_m\} \subset \mathbb{X}$. The restriction of
+	$\mathfrak{H}$
+	to $C$ is the set of functions from $C$ to $\{0,1\}$ that can be derived from
+	$\mathfrak{H}$. That is, 
+	$$
+	\mathfrak{H}_C := \{(h(x_1), \dots, h(x_m)): h \in \mathfrak{H}\}.
+	$$	
+	 \end{definition}
+	 If $\mathfrak{H}_C$ is the set of all functions from $C$ to $\{0,1\}$
+	 we say that $\mathfrak{H}$ shatters $C$. Formally we write as follows.
+	 \begin{definition}[Shattering]
+		A hypothesis class $\mathfrak{H}$ shatters a finite set $C \subset
+		\mathbb{X}$
+		if $|\mathfrak{H}_C|= 2^{|C|}$.
+	 \end{definition}
+	 According to this definition we observe that the class of threshold
+	 functions shatters a set of one point but does not shatter a set of two
+	 points, because it does not exhaust all of its possible labelings.
+
+	 The following definition quantifies the number of different labelings that a
+	 hypothesis class can provide for a dataset of fixed size.
+	 \begin{definition}[Growth Function]
+		Let $\mathfrak{H}$ be a hypothesis class. The growth function of
+		$\mathfrak{H}$, denoted by $\tau_\mathfrak{H} :\mathbb{N} \to \mathbb{N}$ is defined as 
+		$$
+		\tau_\mathfrak{H}(m) := \max_{C \subset \mathbb{X}: |C|=m}|\mathfrak{H}_c|
+		$$
+	\end{definition} 
+	In words; $\tau_\mathfrak{H}(m)$ is the maximum number of different functions
+	from a set $C$ of size $m$ to $\{0,1\}$ that can be obtained
+	by restricting $\mathfrak{H}$ to $C$.
+
+	It turns out that the growth function is a good quantity to measure the
+	complexity of a hypothesis class, since a bounded growth function implies
+	PAC learnability.
+	\begin{thm}
+		\label{thm:PAC_gf}
+		Let $\delta \in (0,1)$ be a confidence parameter and $\epsilon \in
+		(0,1)$ be an accuracy parameter. Let $m$ be an integer that satisfies
+		$$
+		\epsilon \geq  \frac{1}{m}\log(|\tau_\mathfrak{H}(2m)|/\delta).
+		$$ 	
+		Under the realizability assumption it holds that 
+		$$
+		\mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl( \{ R_\mathcal{P}(\hat{h}^*) > \epsilon \}\bigr) \leq \delta.
+		$$
+	\end{thm}	 
+	Note that this result is very similar to \autoref{lem:PAC_fh}. The main difference is that the growth function is used instead of the cardinality of the hypothesis class.
+	\begin{proof}
+		To prove the result it suffices to show that 
+		$$
+		\mathcal{P}^m_x\bigl(\{D|_x: R_\mathcal{P}(\hat{h}^*) > \epsilon\} \bigr) \leq 2 \tau_\mathfrak{H}(2m) 2^{-\epsilon m/2}.
+		$$
+		Given a hypothesis function $h$ we define the quantity $M(h;D)$ as the
+		number of errors that $h$ makes on the dataset $D$. Since we are using
+		the 0-1 loss we note that $\hat{R}_\mathcal{P}(h;D) = M(h;D)/m$. 
+	We define the event $B$ as the event that a hypothesis
+	 is consistent with the training data but does not generalize well, i.e., 
+$$
+B : \exists h \in \mathfrak{H}: M(h;D) = 0 \wedge R_\mathcal{P}(h) > \epsilon.
+$$
+To have an empirical estimate of the true risk we assume that we have access to
+a test set $D'$ of size $m$ that is i.i.d. generated by $\mathcal{P}_x$. We now
+define the event $B'$
+$$ 
+B' : \exists h \in \mathfrak{H}: M(h;D) = 0 \wedge M(h;D') > \epsilon m/2.
+$$
+Now consider the following experiment. For each element $x \in D|_x$ and $x' \in
+D'|_x$ we flip a fair coin. If the coin lands heads we swap $x$ with $x'$.
+Otherwise we do not swap. We denote the resulting datasets by $T$ and $T'$. We
+now define the event $B''$ as follows
+$$ 
+B'' : \exists h \in \mathfrak{H}: M(h;T) = 0 \wedge M(h;T') > \epsilon m/2.
+$$
+We now claim that
+$$
+\mathbb{P}(B) \underbrace{\leq}_{*_1} 2 \mathbb{P}(B') \underbrace{=}_{*_2} 2 \mathbb{P}(B'') \underbrace{\leq}_{*_3} 2 \ \tau_\mathfrak{H}(2m) 2^{-\epsilon m/2}.
+$$
+Proving this claim would complete the proof. We now prove the inequality1
+$*_1$,
+
+Note that 
+\begin{align*}
+	\mathbb{P}(B') &\geq \mathbb{P}(B' \wedge B) \\
+	&= \mathbb{P}(B'|B) \mathbb{P}(B)	
+\end{align*}
+The claim now follows from the fact that $\mathbb{P}(B'|B) \geq 1/2$ if $m \geq 8/\epsilon$. While we
+will not formally prove this result, here is the intuition behind it. Assume
+that the event $B$ has occurred. This means that there is a hypothesis $h$ that
+is consistent with the training data but does not generalize well. Now consider
+$M(h;D')$ as a random variable and note that $\mathbb{E}_{D'|_x \sim
+\mathcal{P}^m_x} M(h;D') = R_\mathcal{P}(h) m$. Since $R_\mathcal{P}(h) >
+\epsilon$ we have that $\mathbb{E}_{D'|_x \sim \mathcal{P}^m_x} M(h;D') >
+\epsilon m/2$. Hence, the probability of $B'$ is equivalent to the probability of
+the random variable $M(h;D')$ being larger than a lower bound to its expected
+value. The desired result is based on the use of a measure-concentration
+inequality, i.e., an inequality that study the convergence of an
+empirical
+average of a random variable to its true expected value.
+
+To see the inequality $*_2$ note that the samples $D, D'$ are i.i.d. generated
+by $\mathcal{P}_x$. Since $T,T'$ were generated by equally likely permutations,
+we have that $T,T'$ are also i.i.d. generated by $\mathcal{P}_x$. Hence, the
+probability of $B''$ is the same as the probability of $B'$.
+
+The inequality $*_3$ follows from the application of the law of total
+expectation which states that for two random variables $X,Y$ it holds that
+$\mathbb{E}(X) = \mathbb{E}(\mathbb{E}(X|Y))$. Note that the probability of some
+event $A$ can be written as the expected value of the indicator function of $A$.
+It hence follows that 
+$$
+\mathbb{P}_{D, D' \sim \mathcal{P}_x^{2m}}(B'') = \mathbb{E}_{D, D' \sim \mathcal{P}_x^{2m}} \mathbb{P}(B''|D,D').
+$$ 
+
+Now let $\mathfrak{H}'$ be a hypothesis class containing one representative for
+each different labeling of $\mathfrak{H}$ of $D, D'$. 
+We have that 
+
+\begin{align*}
+\mathbb{P}(B''|D, D') & = \mathbb{P}(\exists h \in \mathfrak{H}: \underbrace{M(h;T) = 0 \wedge M(h;T') > \epsilon m/2}_{:=b(h)}|D, D')\\ 
+&= \mathbb{P}(\exists h \in \mathfrak{H}': b(h)|D, D')\\
+&\leq \sum_{h \in \mathfrak{H}'} \mathbb{P}(b(h)|D, D')\\
+&\leq |\mathfrak{H}'| 2^{-\epsilon m/2}\quad \text{\color{mildred} assume }{\color{mildred} \mathbb{P}(b(h)|D, D') \leq 2^{-\epsilon m/2}}\\
+&\leq \tau_\mathfrak{H}(2m) 2^{-\epsilon m/2}.
+\end{align*}
+We prove the assumption $\mathbb{P}_{D, D' \sim \mathcal{P}_x^{2m}}(b(h)|D, D') \leq 2^{-\epsilon m/2}$ by
+considering three different cases. For a fixed $h$, we note that $D, D'$ already
+occurred. Hence, the only randomness is coming from the random permutation
+process to construct $T, T'$.
+
+Assume for the first case that there exists an index $i$ s.t. $h$ makes a mistake
+on both $x_i \in D|_x$ and $x'_i \in D'|_x$. In this case, it is not possible to have $M(h;T)=0$.
+Hence, the event $b(h)$ occurs with probability 0.
+
+For the next two cases define $r$ to be the number of pairs $(x_i, x'_i), x_i
+\in D|_x, x_i' \in D'|_x$ where $h$ is wrong on exactly one between the two,
+i.e., either on $x_i$, or on $x'_i$.
+
+Consider for the second case $r < m \epsilon/2$. Even if we get lucky enough and
+all elements on which $h$ is correct end up in $T$, we will not have enough
+datapoints to satisfy the condition $M(h;T') > \epsilon m/2$. Hence, the event $b(h)$ occurs with probability 0.
+
+For the third case consider $r \geq m \epsilon/2$. In this case, we need that
+all the coin flips end up in the correct way to have zero mistakes in $T$ and
+all mistakes in $T'$. Since the coin flips are independent and fair, we have
+that
+$$
+\mathbb{P}(b(h)|D, D') = 2^{-r} \leq 2^{-m \epsilon/2}.
+$$
+
+\end{proof}
+	Due to the combinatorial nature of the growth function, its asymptotic
+behavior is not obvious. Getting hold of it would provide a better bound in
+\autoref{thm:PAC_gf}. We will now introduce the more intuitive quantity of the
+VC-dimension, which will enable us to calculate how many datapoints we need to get
+PAC learnability with a hypothesis class of infinite cardinality.	
+	\begin{definition}[VC (Vapnik-Chervonenkis) dimension]
+		The VC dimension of a hypothesis class $\mathfrak{H}$, denoted
+		$\text{VC-dim}(\mathfrak{H})$ is the cardinality of the largest set $C$ that
+		can be shattered by $\mathfrak{H}$.  
+	\end{definition}
+	\begin{example}
+		To show that a finite hypothesis class has a VC-dimension d, it suffices to show that there exists a set of size $d$ that can be shattered by the hypothesis class and that there exists no set of size $d+1$ that can be shattered by the hypothesis class.
+		\begin{itemize}
+			\item The VC dimension of threshold functions is 1.
+			\item Consider the following hypothesis class
+			$$
+			\mathfrak{H} = \{h: h(x) = \mathbf{1}_{x \in (a,b)}, a<b, a,b\in \mathbb{R}\}.
+			$$ 
+			The VC dimension of this class is 2.
+		\end{itemize}
+	\end{example}
+	The previous examples may convey the idea that the VC dimension of a certain
+	class equals the number of free parameters that the class has. This is not
+	always the case. For example, the VC dimension of the class 
+	$$
+	\mathfrak{H} = \{h(x) = \sin(\theta x): \theta \in \mathbb{R}\}
+	$$
+	is infinite.
+
+	The following lemma allows us to replace the growth function by the VC-dimension in \autoref{thm:PAC_gf}.
+	\begin{lemma}[Sauer's lemma]
+		Let $\mathfrak{H}$ be a hypothesis class. If 
+		\begin{itemize}
+			\item $VC-dim(\mathfrak{H})< \infty$ then $\tau_\mathfrak{H}=O(m^d)$
+			for all $m\in \mathbb{N}$.
+			\item $VC-dim(\mathfrak{H})=\infty$ then $\tau_\mathfrak{H}=2^m$
+			for all $m\in \mathbb{N}$.
+		\end{itemize}
+	\end{lemma}
+		\begin{coro}
+			Let $\delta \in (0,1)$ be a confidence parameter and $\epsilon \in
+			(0,1)$ be an accuracy parameter. Assume
+			$\text{VC-dim}(\mathfrak{H})=d<\infty$. Let $m$ be an integer that
+			satisfies
+			$$
+			\epsilon \geq  C \frac{d \log m + \log(1/\delta)}{m}.
+			$$ 	
+			for some constant $C$.
+			Under the realizability assumption it holds that 
+			$$
+			\mathbb{P}_{D|_x \sim \mathcal{P}^m_x} \bigl( \{ R_\mathcal{P}(\hat{h}^*) > \epsilon \}\bigr) \leq \delta.
+			$$	
+	\end{coro}
+	\begin{proof}
+		The proof follows from applying Sauer's lemma to \autoref{thm:PAC_gf}.
+	\end{proof}
+So far we have seen that the VC-dimension is a good measure of the complexity of
+a hypothesis class in
+the sense that having a finite VC-dimension implies PAC learnability. Now we will
+see that
+an infinite VC-dimension implies that the hypothesis class is not PAC learnable.
+To see this, we use the following theorem that states that a VC-dimension that
+is larger than twice the size of the training data implies that we might end up
+with a hypothesis that does not generalize well. Intuitively, the theorem states
+that having a high VC-dimension implies that the hypothesis class is too rich
+that it can fit random labels, so it is not capable of learning.
+	\begin{lemma}
+		Let $\mathfrak{H}$ be a hypothesis class of functions from $\mathbb{X}$
+		to $\{0,1\}$. Let $m$ be a training set size. Assume that
+		$\text{VC-dim}(\mathfrak{H})\geq 2m$. Then, for any learning algorithm $A$
+		there exist a distribution $\mathcal{P}$ over $\mathbb{X}  \times
+		\{0,1\}$ s.t. $\hat{R}_\mathcal{P}(h^A)=0$ but with probability of at least
+		1/7 over the choise of $D|_x \sim \mathcal{P}_x^m$ we have that 
+		$$
+		R_\mathcal{P}(h^A) \geq 1/8.
+		$$
+	\end{lemma}
+	\begin{coro}
+	Let $\mathfrak{H}$ be a class of inifinite VC-dimension. Then,
+	$\mathfrak{H}$ is not PAC learnable.
+	\end{coro}
+\begin{proof}
+	Since $\text{VC-dim}(\mathfrak{H})=\infty$, for any training set of size
+	$m$, there exists a shattered set of size $2m$. Hence, the result follows
+	from the previous lemma.
+\end{proof}
+While we managed to show that the VC-dimension is a better measure of complexity
+than the finiteness of the hypothesis class, it is still not optimal. One of the
+major limitations of the VC-dimension is its restriction to binary
+classification. In the next section we will see a more general measure of the
+complexity of a hypothesis class, that is the Rademacher complexity.
+\section{Agnostic PAC Learning}
+In the previous discussion we worked under the realizability assumption, i.e., we assumed that the labeling function $f$ is a member
+of the hypothesis class $\mathfrak{H}$. We further showed that this implies the
+existence of functions in $\mathfrak{H}$ that have zero empirical risk on the
+training data. The realizability assumption is, indeed, a very strong
+assumption and in many practical scenarios it does not hold. In this section we
+will relax this assumption and consider the more general case where the labeling
+function $f$ is not necessarily a member of the hypothesis class $\mathfrak{H}$.
+This is known as the agnostic setting. We will further generalize the
+PAC-learning framework to the agnostic setting.
+
+In the previous section we always assumed that $y$ are generated form $x$ by the
+functional relation $f$. From now on, we relax this assumption and assume that
+there is some randomness in the generation of $y$ from $x$ that is described by
+the conditional distribution $\mathcal{P}(y|x)$. 
+
+Generalizing PAC-learning to the agnostic setting is straightforward.
+\begin{definition}
+	A hypothesis class $\mathfrak{H}$ is agnostic PAC learnable if there exist a
+	function $m_\mathfrak{H}: (0,1)^2 \to \mathbb{N}$ and a learning
+	algorithm with the following properties
+	\begin{itemize}
+		\item for every $(\epsilon, \delta) \in (0,1)$
+		\item for every distribution $\mathcal{P}$ over $\mathbb{X} \times \mathbb{Y}$
+	\end{itemize}
+when running the learning
+	algorithm on $m \geq m_\mathfrak{H}(\delta, \epsilon)$ i.i.d. samples
+	generated by $\mathcal{P}$, the algorithm returns a
+	hypothesis $\hat{h}^*$ such that 
+	$$
+	R_\mathcal{P}(\hat{h}^*) \leq \min_{h \in \mathfrak{H}} R_\mathcal{P}(h) +  \epsilon
+	$$ 
+	with probability of at least $1-\delta$ over the choice of the samples.
+\end{definition}
+\begin{definition}[$\epsilon$-representative sample]
+	A training set $S$ is said to be $\epsilon-\text{representative}$
+	(w.r.t. a domain $\mathbb{Z}$, a hypothesis class $\mathfrak{H}$, a
+	loss $l$, and a distribution $\mathcal{P}$) if for every $h \in
+	\mathfrak{H}$ it holds that:
+	$$
+	|R_\mathcal{P}(h) - \hat{R}_\mathcal{P}(h)| \leq \epsilon
+	$$
+\end{definition}
+Whenever a dataset $S$ is $\epsilon/2$-representative, the ERM learner is
+guaranteed to return a good hypothesis (in the agnostic PAC sense).
+\begin{thm}
+Assume that a training set is $\epsilon/2$-representative. Then, for any
+$\hat{h}^* \in \text{argmin}_{h\in \mathfrak{H}} R_{\mathcal{P}}(h)$ it holds that	
+$$
+R_\mathcal{P}(\hat{h}^*) \leq \min_{h\in \mathfrak{H}} R_\mathcal{P}(h) +\epsilon
+$$ 
+\end{thm}
+\begin{definition}[Uniform Convergence]
+	We say that a hypothesis class $\mathfrak{H}$ has the uniform convergence
+	(w.r.t. a domain $\mathbb{Z}$, and loss $l$) if there exists a function
+	$m_\mathfrak{H}^{\text{UC}}:(0,1)^2 \to \mathbb{N}$ such that for every
+	$\epsilon, \delta \in (0,1)$ and every distribution $\mathcal{P}$ over
+	$\mathbb{Z}$, if $S$ is a sample of size $m \geq
+	m_\mathfrak{H}^{\text{UC}}(\epsilon, \delta)$ examples drawn i.i.d.
+	according to $\mathcal{P}$ then with probability of at
+	least $1-\delta$ it holds that $S$ is $\epsilon$-representative.
+\end{definition}	
+\begin{coro}
+If a hypothesis class $\mathfrak{H}$ has the uniform convergence property with a
+function $m_\mathfrak{H}^{\text{UC}}$ then $\mathfrak{H}$ is agnostically PAC
+learnable with sample complexity $m_\mathfrak{H}(\epsilon, \delta) \leq
+m_\mathfrak{H}^{\text{UC}}(\epsilon/2, \delta)$.
+\end{coro}
+\subsection{Finite Hypothesis Classes Revisited}
+$\mathfrak{H}$ finite hypothesis class. $l: \mathbb{Z} \to [0,1]$ a loss function 
+	\begin{thm}
+	$\mathfrak{H}$ is agnostically PAC learnable with sample complexity
+	$$m_{\mathfrak{H}}(\epsilon, \delta) \leq \lceil \frac{2 \log (2
+	|\mathfrak{H}|/ \delta)}{\epsilon^2} \rceil$$
+\end{thm}
+\begin{proof}
+	Based on Hoeffding's inequality.
+\end{proof}
+\begin{thm}[Hoeffding's inequality]
+	Let $\theta_1, \dots, \theta_n$ be a sequence of i.i.d. random variables
+	and assume that for all $i$ $\mathbb{E}[\theta_i] = \mu$ and
+	$\mathbb{P}[a \leq \theta_i \leq b]=1$. Then, for any $\epsilon > 0$
+	$$
+	\mathbb{P}[|\frac{1}{m} \sum_{i=1}^{m} \theta_i - \mu| > \epsilon] \leq 2 \exp(-2m\epsilon^2/(b-a)^2)
+	$$ 	
+\end{thm}
+\subsection{Rademacher Complexity}
+
+\section{Occam's Razor and the Overparameterization Regime}
 $$
 	R_{\mathcal{P}_z}(\hat{h}^*) = \underbrace{\min_{h \in \mathfrak{H}} R_{\mathcal{P}_z}(h)}_{\text{approximation/training error}} + \underbrace{R_{\mathcal{P}_z}(\hat{h}^*) - \min_{h \in \mathfrak{H}} R_{\mathcal{P}_z}(h)}_{\text{estimation/test error}} 
 	$$
