@@ -627,7 +627,7 @@ function $f$ is not necessarily a member of the hypothesis class $\mathfrak{H}$.
 This is known as the agnostic setting. We will further generalize the
 PAC-learning framework to the agnostic setting.
 
-In the previous section we always assumed that $y$ are generated form $x$ by the
+In the previous section we always assumed that the target value $y$ is generated form $x$ by the
 functional relation $f$. From now on, we relax this assumption and assume that
 there is some randomness in the generation of $y$ from $x$ that is described by
 the conditional distribution $\mathcal{P}(y|x)$. 
@@ -650,42 +650,50 @@ when running the learning
 	$$ 
 	with probability of at least $1-\delta$ over the choice of the samples.
 \end{definition}
+We note that under the realizability assumption, agnostic PAC-learning
+reduces to PAC-learning. We now define a tool that will allow us to prove
+agnostic PAC learnability of a hypothesis class.
 \begin{definition}[$\epsilon$-representative sample]
 	A training set $S$ is said to be $\epsilon-\text{representative}$
 	(w.r.t. a domain $\mathbb{Z}$, a hypothesis class $\mathfrak{H}$, a
 	loss $l$, and a distribution $\mathcal{P}$) if for every $h \in
-	\mathfrak{H}$ it holds that:
+	\mathfrak{H}$ it holds that
 	$$
 	|R_\mathcal{P}(h) - \hat{R}_\mathcal{P}(h)| \leq \epsilon
 	$$
 \end{definition}
-Whenever a dataset $S$ is $\epsilon/2$-representative, the ERM learner is
+We emphasize that this definition is uniform for $h\in \mathfrak{H}$. 
+
+Whenever a dataset $D$ is $\epsilon/2$-representative, the ERM learner is
 guaranteed to return a good hypothesis (in the agnostic PAC sense).
 \begin{thm}
 Assume that a training set is $\epsilon/2$-representative. Then, for any
-$\hat{h}^* \in \text{argmin}_{h\in \mathfrak{H}} R_{\mathcal{P}}(h)$ it holds that	
+$$\hat{h}^* \in \text{argmin}_{h\in \mathfrak{H}} R_{\mathcal{P}}(h)$$ it holds that	
 $$
 R_\mathcal{P}(\hat{h}^*) \leq \min_{h\in \mathfrak{H}} R_\mathcal{P}(h) +\epsilon
 $$ 
 \end{thm}
-\begin{definition}[Uniform Convergence]
-	We say that a hypothesis class $\mathfrak{H}$ has the uniform convergence
-	(w.r.t. a domain $\mathbb{Z}$, and loss $l$) if there exists a function
-	$m_\mathfrak{H}^{\text{UC}}:(0,1)^2 \to \mathbb{N}$ such that for every
-	$\epsilon, \delta \in (0,1)$ and every distribution $\mathcal{P}$ over
-	$\mathbb{Z}$, if $S$ is a sample of size $m \geq
-	m_\mathfrak{H}^{\text{UC}}(\epsilon, \delta)$ examples drawn i.i.d.
-	according to $\mathcal{P}$ then with probability of at
-	least $1-\delta$ it holds that $S$ is $\epsilon$-representative.
-\end{definition}	
-\begin{coro}
-If a hypothesis class $\mathfrak{H}$ has the uniform convergence property with a
-function $m_\mathfrak{H}^{\text{UC}}$ then $\mathfrak{H}$ is agnostically PAC
-learnable with sample complexity $m_\mathfrak{H}(\epsilon, \delta) \leq
-m_\mathfrak{H}^{\text{UC}}(\epsilon/2, \delta)$.
-\end{coro}
+\begin{proof}
+	For any $h$ in $\mathfrak{H}$ we have that
+	\begin{align*}
+		R_\mathcal{P}(\hat{h}^*) &\leq \hat{R}_\mathcal{P}(\hat{h}^*) + \epsilon/2 \quad {\color{mildred} D \text{ is }\epsilon/2- \text{representative}}\\
+		&\leq \hat{R}_\mathcal{P}(h) + \epsilon/2 \quad \text{\color{mildred} $\hat{h}^* \in \text{argmin}_{h\in \mathfrak{H}} \hat{R}_\mathcal{P}(h)$}\\
+		&\leq R_\mathcal{P}(h) + \epsilon \quad {\color{mildred} D \text{ is }\epsilon/2- \text{representative}}.
+	\end{align*}
+	The result holds in particular for the hypothesis $\hat{h}^*$.
+\end{proof}
+
+The previous theorem suggests that it is enough to prove uniform convergence of
+the empirical risk to the true risk to show agnostic PAC learnability, i.e., it
+is enough to show
+$$
+\hat{R}_\mathcal{P}(h) \leq R_\mathcal{P}(h) + \epsilon/2
+$$
+for all $h \in \mathfrak{H}$ with high probability. 
 \subsection{Finite Hypothesis Classes Revisited}
-$\mathfrak{H}$ finite hypothesis class. $l: \mathbb{Z} \to [0,1]$ a loss function 
+We now apply our new knowledge to show that a finite hypothesis class is
+agnostic PAC-learnable. $\mathfrak{H}$ finite hypothesis class. $l: \mathbb{Z} \to [0,1]$ a
+loss function 
 	\begin{thm}
 	$\mathfrak{H}$ is agnostically PAC learnable with sample complexity
 	$$m_{\mathfrak{H}}(\epsilon, \delta) \leq \lceil \frac{2 \log (2
@@ -703,7 +711,166 @@ $\mathfrak{H}$ finite hypothesis class. $l: \mathbb{Z} \to [0,1]$ a loss functio
 	$$ 	
 \end{thm}
 \subsection{Rademacher Complexity}
+We found out in the last section that the VC-dimension is a good measure of the
+complexity of a hypothesis class. However, the VC-dimension is limited to binary
+classification problems. While there are ways to rectify this limitation, we
+will look into 	 a more general measure of the complexity of a hypothesis class,
+mainly that of the Rademacher complexity. 
 
+We start by motivating the Rademacher complexity with a simple example. 
+
+Consider the binary classification task with the zero-one loss. Further, assume
+that the target values $y \in \{-1,1\}$. Note that 
+\begin{align*}
+	\hat{R}_\mathcal{P}(h) &= \frac{1}{m} \sum_{i=1}^m l(y_i, h(x_i)) \\
+	&= \frac{1}{m} \sum_{i=1}^{m} \mathbf{1}_{\{h(x_i) \neq y_i\}} \quad \text{\color{mildred} since we are using the 0-1 loss} \\  	
+	& = \frac{1}{m} \sum_{i=1}^{m} \frac{1- h(x_i)y_i}{2} \quad \text{\color{mildred} since $y_i \in \{-1,1\}$ for any $i$}\\
+	& = \frac{1}{m} - \frac{1}{2m} \sum_{i=1}^{m} h(x_i)y_i.
+\end{align*}
+Thus,
+$$
+\frac{1}{2} \sum_{i=0}^{m} h(x_i)y_i = 1 - 2 \hat{R}_\mathcal{P}(h).
+$$
+The qunatity $\frac{1}{2} \sum_{i=0}^{m} h(x_i)y_i$ is a good measure of how
+well the hypothesis $h$ fits the data. Note also that minimizing the empirical
+risk is equivalent to maximizing this quantity. The Rademacher complexity
+generalizes this qunatity to be a measure of how well $h$ fits any dataset, not
+only $D$. Formally, let one replaces $y_i$ by a random variable $\sigma_i$ that
+is takes values in $\{-1,1\}$ with equal probability. The Rademacher complexity
+is thus defined to be
+$$
+\text{Rad}(\mathfrak{H}) := \mathbb{E}_{\sigma} \bigl[ \sup_{h \in \mathfrak{H}} \frac{1}{m} \sum_{i=1}^{m} \sigma_i h(x_i) \bigr].
+$$
+We now compute this quantity for two simple hypothesis classes. First, let the
+hypothesis class contain one element, i.e., $\mathfrak{H} = \{h\}$. We then
+compute 
+\begin{align*}
+	\text{Rad}(\mathfrak{H}) &= \mathbb{E}_{\sigma} \bigl[ \frac{1}{m} \sum_{i=1}^{m} \sigma_i h(x_i) \bigr] \\
+	&= \frac{1}{m} \sum_{i=1}^{m} \mathbb{E}_{\sigma}[\sigma_i] h(x_i)\\
+	&= \frac{1}{m} \sum_{i=1}^{m} 0 h(x_i)\\
+	&= 0.
+\end{align*}
+We now consider the case, where $\mathfrak{H}$ shatters the dataset $D$. In this
+case, we have that the empirical risk of the ERM hypothesis is zero. Hence, the
+Rademacher complexity is one.
+
+We will now show that our definition of the Rademacher complexity extends in a
+meaningful way to regression
+problems. 
+
+To get more intuition into the Rademacher complexity, we consider now a generic
+supervised learning problem. Given a certain dataset $D$ we define its
+representativeness to be
+$$
+\text{Rep}(D) := \sup_{h \in \mathfrak{H}} (\hat{R}_\mathcal{P}(h;D) - R_\mathcal{P}(h)).
+$$
+Clearly, one cannot compute this quantity since one cannot compute the true
+risk. Therefore one can approximate this quantity by consider a test dataset
+$D'$ generated from the true distribution $\mathcal{P}$. We define the empirical
+representativeness of $D$ to be 
+$$
+\hat{\text{Rep}}(D) := \sup_{h \in \mathfrak{H}} (\hat{R}_\mathcal{P}(h;D) - \hat{R}_{\mathcal{P}}(h;D')).
+$$
+Note that 
+\begin{align*}
+	\hat{\text{Rep}}(D) &= \sup_{h \in \mathfrak{H}} (\sum_{(x_i, y_i) \in D} l(h(x_i), y_i) - \sum_{(x_i, y_i) \in D'} l(h(x_i), y_i'))\\
+\end{align*}
+Now assume that $|D|=|D'|=m/2$ and let set 
+\begin{equation*}
+	\sigma_i= \begin{cases}
+		1 & if (x_i, y_i) \in D\\
+		-1 & if (x_i, y_i) \in D'
+	\end{cases}.
+\end{equation*}
+It follows that 
+\begin{align*}
+	\hat{\text{Rep}}(D) 
+	&= \sup_{h \in \mathfrak{H}} \frac{2}{m} \sum_{i=1}^{m} \sigma_i l(h(x_i), y_i).
+\end{align*}
+The Rademacher complexity generalizes this idea by taking the expectation over all possible choices of $\sigma_i$.
+
+We note that the Rademacher complexity of a hypothesis class depends on the
+choice of a loss function and training data set $D$. Hence, we introduce the
+following notation to make this dependence explicit.
+$$l \circ \mathfrak{H} \circ D := \{\bigl(l(h(x_1), y_1), \dots, l(h(x_m), y_m)\bigr) : h \in
+\mathfrak{H}\}$$
+$$
+\mathfrak{F} := l \circ \mathfrak{H} := \{ z \to l(h,z): h \in \mathfrak{H}\}
+$$
+We are now ready to state the formal definition of the Rademacher complexity.
+\begin{definition}[Rademacher Complexity]
+Let $\mathbf{\sigma} = (\sigma_1, \dots, \sigma_m) \in \{-1,1\}^m$ be a vector
+of random variables such that $\mathbb{P} [\sigma_i = 1] = \mathbb{P} [\sigma_i]
+= 1/2$. The Rademacher complexity of $l\circ \mathfrak{H} \circ D$ is defined as
+\begin{align*}
+\text{Rad}(l \circ \mathfrak{H} \circ D) :&= \frac{1}{2} \mathbb{E}_{\mathbf{\sigma}} \bigl[ \hat{\text{Rep}}(D) \bigr] \\
+&=\mathbb{E}_{\mathbf{\sigma}} \bigl[ \sup_{f \in \mathfrak{F}} \frac{1}{m} \sum_{i=1}^{m} \sigma_i f(x_i) \bigr] \\
+&= \mathbb{E}_{\mathbf{\sigma}} \bigl[ \sup_{h \in \mathfrak{H}} \frac{1}{m} \sum_{i=1}^{m} \sigma_i l(h(x_i), y_i) \bigr]
+\end{align*} 
+\end{definition}
+We now show that a finite Rademacher complexity allows for agnostic PAC learning.
+\begin{thm}
+	Assume that for all $z=(x,y)$ and $h \in \mathfrak{H}$, $|l(h(x),y)| \leq c$.
+	Then, for any $\delta > 0$ with probability of at least $1-\delta$ over
+	the choice of the sample $D$, for any $h \in \mathfrak{H}$ it holds that
+	$$
+	R_{\mathcal{P}}(h) \leq \hat{R}_{\mathcal{P}}(h) + 2 \text{Rad}(l \circ \mathfrak{H} \circ D) + c \sqrt{\frac{2 \log(4/\delta)}{m}}
+	$$
+	and 
+	$$
+	\hat{R}_{\mathcal{P}}(h) \leq R_{\mathcal{P}}(h) + 2 \mathbb{E}_{D' \sim \mathcal{P}^m} \bigl[ \text{Rad}(l \circ \mathfrak{H} \circ D') \bigr] + c \sqrt{\frac{2 \log(2/\delta)}{m}}
+	$$
+	These results hold in particular for $h=\hat{h}^*$.
+\end{thm}
+We accept the previous theorem without proof. However, we note that the proof is
+similar to the proof of the agnostic PAC learnability of finite hypothesis
+classes. The main difference here lies in the utilization of another
+concentration-of-measure inequality, namely the McDiarmid's inequality.
+
+We will now derive a meaningful bound to the Rademacher complexity of the
+linear hypothesis class given by 
+$$
+\mathfrak{H} = \{x \to \langle x, w \rangle: \quad w \in  \mathbb{R}^n\},
+$$
+where $\langle., . \rangle$ denotes the inner product on $\mathbb{R}^n$. To this
+end, we need the following result.
+
+\begin{lemma}[Letting out of the Loss Function]
+	For any training example, let $\phi_i: \mathbb{R} \to \mathbb{R}$ be a
+	$\rho-$Lipschitz function. For $\mathbf{a} = (a_1, \dots, a_m) \in
+	\mathbb{R}^m$ let $\mathbf{\phi}(a) = (\phi({a_1}), \dots,
+	\phi(a_m))$. Let $\mathbf{\phi} \circ A = \{\mathbf{\phi}(a): \quad a \in
+	A\}$. Then, it holds that
+	$$ 
+	\text{Rad}(\mathbf{\phi} \circ A) \leq \rho \text{Rad}(A)
+	$$		
+\end{lemma}
+The previous lemma allows us to consider the Rademacher complexity of
+$\mathfrak{H} \circ D$ instead of $l \circ \mathfrak{H} \circ D$ under a
+Lipschitz constraint on the loss function $l$.
+
+\begin{thm}[Rademacher complexity of Linear Classes]
+	It holds that
+	$$
+	\text{Rad}(\mathfrak{H} \circ D) \leq \frac{\|w\|_2}{m} \max_i \|x_i\|_2 
+	$$
+\end{thm}
+\begin{proof}
+	\begin{align*}
+		m \text{Rad}(l \circ \mathfrak{H} \circ D) &= \mathbb{E}_{\sigma} \bigl[ \sup_{a \in \mathfrak{H} \circ D} \sum_{i=1}^{m} \sigma_i a_i \bigr] \\
+		&= \mathbb{E}_{\sigma} \bigl[ \sup_{w \in \mathbb{R}^n} \sum_{i=1}^{m} \sigma_i \langle x_i, w \rangle \bigr] \\
+		&= \mathbb{E}_{\sigma} \bigl[ \sup_{w \in \mathbb{R}^n} \langle \sum_{i=1}^{m} \sigma_i x_i, w \rangle \bigr] \\
+		&\leq \|w\|_2 \mathbb{E}_{\sigma} \bigl[ \|\sum_{i=1}^{m} \sigma_i x_i\|_2 \bigr] \quad \text{\color{mildred} by the Cauchy-Schwarz inequality} \\
+		&\leq \|w\|_2 \mathbb{E}_{\sigma} \bigl[ \|\sum_{i=1}^{m} \sigma_i x_i\|_2^2 \bigr]^{1/2} \quad \text{\color{mildred} using Jensen's inequality} \\
+		&= \|w\|_2 \mathbb{E}_{\sigma} \bigl[ \sum_{i,j} \sigma_i \sigma_j \langle x_i, x_j \rangle \bigr]^{1/2} \\
+		&= \|w\|_2 \mathbb{E}_{\sigma} \bigl[ \sum_{i \neq j} \sigma_i \sigma_j \langle x_i, x_j \rangle + \sum_{i} \sigma_i^2 \langle x_i, x_i \rangle \bigr]^{1/2} \\
+		&= \|w\|_2 \bigl( \sum_{i \neq j} \mathbb{E}_{\sigma} [\sigma_i \sigma_j] \langle x_i, x_j \rangle + \sum_{i} \mathbb{E}_{\sigma} [\sigma_i^2] \langle x_i, x_i \rangle \bigr)^{1/2} \\ 
+		&= \|w\|_2 \bigl( \sum_{i \neq j} 0\ \langle x_i, x_j \rangle + \sum_{i} 1 \langle x_i, x_i \rangle \bigr)^{1/2} \quad \text{\color{mildred} since $\sigma_i$ are independent} \\
+		&= \|w\|_2  \sum_{i} \|x_i\|_2^{1/2} \\
+		&\leq \|w\|_2 \ m \ \max_i \|x_i\|_2^{1/2}.
+	\end{align*}
+\end{proof}
+Interpretation: 
 \section{Occam's Razor and the Overparameterization Regime}
 $$
 	R_{\mathcal{P}_z}(\hat{h}^*) = \underbrace{\min_{h \in \mathfrak{H}} R_{\mathcal{P}_z}(h)}_{\text{approximation/training error}} + \underbrace{R_{\mathcal{P}_z}(\hat{h}^*) - \min_{h \in \mathfrak{H}} R_{\mathcal{P}_z}(h)}_{\text{estimation/test error}} 
