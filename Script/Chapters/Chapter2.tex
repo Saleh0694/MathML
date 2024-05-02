@@ -617,14 +617,14 @@ major limitations of the VC-dimension is its restriction to binary
 classification. In the next section we will see a more general measure of the
 complexity of a hypothesis class, that is the Rademacher complexity.
 \section{Agnostic PAC Learning}
-In the previous discussion we worked under the realizability assumption, i.e., we assumed that the labeling function $f$ is a member
-of the hypothesis class $\mathfrak{H}$. We further showed that this implies the
+So far we worked under the realizability assumption, i.e., we assumed that the labeling function $f$ is a member
+of the hypothesis class $\mathfrak{H}$. We showed that this implies the
 existence of functions in $\mathfrak{H}$ that have zero empirical risk on the
 training data. The realizability assumption is, indeed, a very strong
 assumption and in many practical scenarios it does not hold. In this section we
 will relax this assumption and consider the more general case where the labeling
 function $f$ is not necessarily a member of the hypothesis class $\mathfrak{H}$.
-This is known as the agnostic setting. We will further generalize the
+This is known as the agnostic setting. We will generalize the
 PAC-learning framework to the agnostic setting.
 
 In the previous section we always assumed that the target value $y$ is generated form $x$ by the
@@ -654,7 +654,7 @@ We note that under the realizability assumption, agnostic PAC-learning
 reduces to PAC-learning. We now define a tool that will allow us to prove
 agnostic PAC learnability of a hypothesis class.
 \begin{definition}[$\epsilon$-representative sample]
-	A training set $S$ is said to be $\epsilon-\text{representative}$
+	A training set $D$ is said to be $\epsilon-\text{representative}$
 	(w.r.t. a domain $\mathbb{Z}$, a hypothesis class $\mathfrak{H}$, a
 	loss $l$, and a distribution $\mathcal{P}$) if for every $h \in
 	\mathfrak{H}$ it holds that
@@ -690,26 +690,43 @@ $$
 \hat{R}_\mathcal{P}(h) \leq R_\mathcal{P}(h) + \epsilon/2
 $$
 for all $h \in \mathfrak{H}$ with high probability. 
+We apply this new knowledge to show that a finite hypothesis class is
+agnostic PAC-learnable.
 \subsection{Finite Hypothesis Classes Revisited}
-We now apply our new knowledge to show that a finite hypothesis class is
-agnostic PAC-learnable. $\mathfrak{H}$ finite hypothesis class. $l: \mathbb{Z} \to [0,1]$ a
-loss function 
-	\begin{thm}
-	$\mathfrak{H}$ is agnostically PAC learnable with sample complexity
-	$$m_{\mathfrak{H}}(\epsilon, \delta) \leq \lceil \frac{2 \log (2
-	|\mathfrak{H}|/ \delta)}{\epsilon^2} \rceil$$
-\end{thm}
-\begin{proof}
-	Based on Hoeffding's inequality.
-\end{proof}
+Previously, we showed that a finite hypothesis class is PAC learnable. It turns
+out that we can extend this to the agnostic setting. For this we rely on the
+following concentration-of-measure inequality. 
 \begin{thm}[Hoeffding's inequality]
 	Let $\theta_1, \dots, \theta_n$ be a sequence of i.i.d. random variables
 	and assume that for all $i$ $\mathbb{E}[\theta_i] = \mu$ and
 	$\mathbb{P}[a \leq \theta_i \leq b]=1$. Then, for any $\epsilon > 0$
 	$$
-	\mathbb{P}[|\frac{1}{m} \sum_{i=1}^{m} \theta_i - \mu| > \epsilon] \leq 2 \exp(-2m\epsilon^2/(b-a)^2)
+	\mathbb{P}[|\frac{1}{m} \sum_{i=1}^{m} \theta_i - \mu| > \epsilon] \leq 2 \exp(-2m\epsilon^2/(b-a)^2).
 	$$ 	
 \end{thm}
+We are now ready to state our first result in agnostic PAC learning setting.
+	\begin{thm}
+	Let $|\mathfrak{H}| < \infty$ then $\mathfrak{H}$ is agnostically PAC learnable with sample complexity
+	$$m_{\mathfrak{H}}(\epsilon, \delta) \leq \lceil \frac{2 \log (2
+	|\mathfrak{H}|/ \delta)}{\epsilon^2} \rceil$$
+\end{thm}
+\begin{proof}
+As previously discussed, it is sufficient here to show the uniform convergence
+property, i.e., to show that 
+$$\mathbb{P}_{D \sim \mathcal{P}^m} \bigl( \{ D: \ \exists h \in \mathfrak{H},
+|R_\mathcal{P}(h) - \hat{R}_\mathcal{P}(h)| > \epsilon \}\bigr) \leq
+\delta.$$
+To this end we write 
+\begin{align*}
+	\mathbb{P}_{D \sim \mathcal{P}^m} \bigl( \{ D: \ \exists h \in \mathfrak{H},
+|R_\mathcal{P}(h) - \hat{R}_\mathcal{P}(h)| > \epsilon \}\bigr) &\leq \sum_{h \in \mathfrak{H}} \mathbb{P}_{D \sim \mathcal{P}^m} \bigl( \{ D: \ |R_\mathcal{P}(h) - \hat{R}_\mathcal{P}(h)| > \epsilon \}\bigr)\\
+	&\leq |\mathfrak{H}| \cdot 2 \exp(-2m\epsilon^2) \\
+	&\leq \delta,
+\end{align*}
+where we used Hoeffding's inequality after having noted that $R_\mathcal{P}(h) =  \mathbb{E}_{D \sim \mathcal{P}^m} \hat{R}_\mathcal{P}(h)$.
+\end{proof}
+We now talk about a new measure of complexity of a hypothesis class and show
+agnostic PAC learnability in the new setting.
 \subsection{Rademacher Complexity}
 We found out in the last section that the VC-dimension is a good measure of the
 complexity of a hypothesis class. However, the VC-dimension is limited to binary
@@ -725,7 +742,7 @@ that the target values $y \in \{-1,1\}$. Note that
 	\hat{R}_\mathcal{P}(h) &= \frac{1}{m} \sum_{i=1}^m l(y_i, h(x_i)) \\
 	&= \frac{1}{m} \sum_{i=1}^{m} \mathbf{1}_{\{h(x_i) \neq y_i\}} \quad \text{\color{mildred} since we are using the 0-1 loss} \\  	
 	& = \frac{1}{m} \sum_{i=1}^{m} \frac{1- h(x_i)y_i}{2} \quad \text{\color{mildred} since $y_i \in \{-1,1\}$ for any $i$}\\
-	& = \frac{1}{m} - \frac{1}{2m} \sum_{i=1}^{m} h(x_i)y_i.
+	& = \frac{1}{2} - \frac{1}{2} \sum_{i=1}^{m} h(x_i)y_i.
 \end{align*}
 Thus,
 $$
@@ -734,14 +751,16 @@ $$
 The qunatity $\frac{1}{2} \sum_{i=0}^{m} h(x_i)y_i$ is a good measure of how
 well the hypothesis $h$ fits the data. Note also that minimizing the empirical
 risk is equivalent to maximizing this quantity. The Rademacher complexity
-generalizes this qunatity to be a measure of how well $h$ fits any dataset, not
-only $D$. Formally, let one replaces $y_i$ by a random variable $\sigma_i$ that
-is takes values in $\{-1,1\}$ with equal probability. The Rademacher complexity
-is thus defined to be
+generalizes this quantity to be a measure of how well $h$ fits any dataset, not
+only $D$. Formally, one replaces $y_i$ by a random variable $\sigma_i$ that
+ takes values in $\{-1,1\}$ with equal probability. The Rademacher complexity
+is defined to be
 $$
 \text{Rad}(\mathfrak{H}) := \mathbb{E}_{\sigma} \bigl[ \sup_{h \in \mathfrak{H}} \frac{1}{m} \sum_{i=1}^{m} \sigma_i h(x_i) \bigr].
 $$
-We now compute this quantity for two simple hypothesis classes. First, let the
+Intuitively, the Rademacher complexity measures how well a hypothesis class can
+fit random labels. Let us now compute the Rademacher complexity for two simple hypothesis classes.
+First, let the
 hypothesis class contain one element, i.e., $\mathfrak{H} = \{h\}$. We then
 compute 
 \begin{align*}
@@ -750,7 +769,7 @@ compute
 	&= \frac{1}{m} \sum_{i=1}^{m} 0 h(x_i)\\
 	&= 0.
 \end{align*}
-We now consider the case, where $\mathfrak{H}$ shatters the dataset $D$. In this
+Second, we consider the case, where $\mathfrak{H}$ shatters the dataset $D$. In this
 case, we have that the empirical risk of the ERM hypothesis is zero. Hence, the
 Rademacher complexity is one.
 
@@ -758,22 +777,22 @@ We will now show that our definition of the Rademacher complexity extends in a
 meaningful way to regression
 problems. 
 
-To get more intuition into the Rademacher complexity, we consider now a generic
+Consider now a generic
 supervised learning problem. Given a certain dataset $D$ we define its
 representativeness to be
 $$
-\text{Rep}(D) := \sup_{h \in \mathfrak{H}} (\hat{R}_\mathcal{P}(h;D) - R_\mathcal{P}(h)).
+\text{Rep}(D) := \sup_{h \in \mathfrak{H}} \ (\hat{R}_\mathcal{P}(h;D) - R_\mathcal{P}(h)).
 $$
 Clearly, one cannot compute this quantity since one cannot compute the true
-risk. Therefore one can approximate this quantity by consider a test dataset
+risk. Therefore, one can approximate this quantity by consider a test dataset
 $D'$ generated from the true distribution $\mathcal{P}$. We define the empirical
 representativeness of $D$ to be 
 $$
-\hat{\text{Rep}}(D) := \sup_{h \in \mathfrak{H}} (\hat{R}_\mathcal{P}(h;D) - \hat{R}_{\mathcal{P}}(h;D')).
+\hat{\text{Rep}}(D) := \sup_{h \in \mathfrak{H}} \ (\hat{R}_\mathcal{P}(h;D) - \hat{R}_{\mathcal{P}}(h;D')).
 $$
 Note that 
 \begin{align*}
-	\hat{\text{Rep}}(D) &= \sup_{h \in \mathfrak{H}} (\sum_{(x_i, y_i) \in D} l(h(x_i), y_i) - \sum_{(x_i, y_i) \in D'} l(h(x_i), y_i'))\\
+	\hat{\text{Rep}}(D) &= \sup_{h \in \mathfrak{H}} \ (\sum_{(x_i, y_i) \in D} l(h(x_i), y_i) - \sum_{(x_i, y_i) \in D'} l(h(x_i), y_i'))\\
 \end{align*}
 Now assume that $|D|=|D'|=m/2$ and let set 
 \begin{equation*}
@@ -800,12 +819,12 @@ $$
 We are now ready to state the formal definition of the Rademacher complexity.
 \begin{definition}[Rademacher Complexity]
 Let $\mathbf{\sigma} = (\sigma_1, \dots, \sigma_m) \in \{-1,1\}^m$ be a vector
-of random variables such that $\mathbb{P} [\sigma_i = 1] = \mathbb{P} [\sigma_i]
+of random variables such that $\mathbb{P} [\sigma_i = 1] = \mathbb{P} [\sigma_i=-1]
 = 1/2$. The Rademacher complexity of $l\circ \mathfrak{H} \circ D$ is defined as
 \begin{align*}
 \text{Rad}(l \circ \mathfrak{H} \circ D) :&= \frac{1}{2} \mathbb{E}_{\mathbf{\sigma}} \bigl[ \hat{\text{Rep}}(D) \bigr] \\
-&=\mathbb{E}_{\mathbf{\sigma}} \bigl[ \sup_{f \in \mathfrak{F}} \frac{1}{m} \sum_{i=1}^{m} \sigma_i f(x_i) \bigr] \\
-&= \mathbb{E}_{\mathbf{\sigma}} \bigl[ \sup_{h \in \mathfrak{H}} \frac{1}{m} \sum_{i=1}^{m} \sigma_i l(h(x_i), y_i) \bigr]
+&=\mathbb{E}_{\mathbf{\sigma}} \bigl[ \sup_{f \in \mathfrak{F}} \frac{1}{m} \ \sum_{i=1}^{m} \sigma_i f(x_i) \bigr] \\
+&= \mathbb{E}_{\mathbf{\sigma}} \bigl[ \sup_{h \in \mathfrak{H}} \frac{1}{m} \ \sum_{i=1}^{m} \sigma_i l(h(x_i), y_i) \bigr]
 \end{align*} 
 \end{definition}
 We now show that a finite Rademacher complexity allows for agnostic PAC learning.
@@ -813,9 +832,10 @@ We now show that a finite Rademacher complexity allows for agnostic PAC learning
 	Assume that for all $z=(x,y)$ and $h \in \mathfrak{H}$, $|l(h(x),y)| \leq c$.
 	Then, for any $\delta > 0$ with probability of at least $1-\delta$ over
 	the choice of the sample $D$, for any $h \in \mathfrak{H}$ it holds that
-	$$
-	R_{\mathcal{P}}(h) \leq \hat{R}_{\mathcal{P}}(h) + 2 \text{Rad}(l \circ \mathfrak{H} \circ D) + c \sqrt{\frac{2 \log(4/\delta)}{m}}
-	$$
+	\begin{equation}
+		\label{eq:ERM_principle}
+		R_{\mathcal{P}}(h) \leq \hat{R}_{\mathcal{P}}(h) + 2 \text{Rad}(l \circ \mathfrak{H} \circ D) + c \sqrt{\frac{2 \log(4/\delta)}{m}}		
+	\end{equation}
 	and 
 	$$
 	\hat{R}_{\mathcal{P}}(h) \leq R_{\mathcal{P}}(h) + 2 \mathbb{E}_{D' \sim \mathcal{P}^m} \bigl[ \text{Rad}(l \circ \mathfrak{H} \circ D') \bigr] + c \sqrt{\frac{2 \log(2/\delta)}{m}}
@@ -826,6 +846,19 @@ We accept the previous theorem without proof. However, we note that the proof is
 similar to the proof of the agnostic PAC learnability of finite hypothesis
 classes. The main difference here lies in the utilization of another
 concentration-of-measure inequality, namely the McDiarmid's inequality.
+\begin{rmk}[Empirical Risk Minimization Principle]
+	Let us now spend some time to discuss the interpretation of the last theorem.
+	\eqref{eq:ERM_principle} suggests that the true risk of any hypothesis $h$ is
+	bounded by the empirical risk of $h$ plus a term that depends on the complexity
+	of the hypothesis class and the size of the training data set. This result
+	offers us a way to escape the dilemma of supervised learning, i.e., the fact
+	that we want to minimize the true risk, although we do not have access to the
+	true distribution of data. Since we cannot directly minimize the true risk, we
+	can do the next best thing available to us, i.e., minimize an upperbound to it.
+	Such result is called the ERM principle. We emphasize that the main message here
+	is that we can solve the supervised learning problem by minimizing the empirical
+	risk while controlling the complexity of the hypothesis class.		
+\end{rmk}
 
 We will now derive a meaningful bound to the Rademacher complexity of the
 linear hypothesis class given by 
@@ -845,10 +878,9 @@ end, we need the following result.
 	\text{Rad}(\mathbf{\phi} \circ A) \leq \rho \text{Rad}(A)
 	$$		
 \end{lemma}
-The previous lemma allows us to consider the Rademacher complexity of
-$\mathfrak{H} \circ D$ instead of $l \circ \mathfrak{H} \circ D$ under a
-Lipschitz constraint on the loss function $l$.
-
+	The previous lemma allows us to consider the Rademacher complexity of
+	$\mathfrak{H} \circ D$ instead of $l \circ \mathfrak{H} \circ D$ under a
+	Lipschitz constraint on the loss function $l$.		
 \begin{thm}[Rademacher complexity of Linear Classes]
 	It holds that
 	$$
@@ -870,10 +902,94 @@ Lipschitz constraint on the loss function $l$.
 		&\leq \|w\|_2 \ m \ \max_i \|x_i\|_2^{1/2}.
 	\end{align*}
 \end{proof}
-Interpretation: 
+\begin{rmk}[Link to Regularization]
+The previous results shows that the Rademacher complexity of a linear hypothesis
+is bounded by the product of the norm of the weight vector and the maximum norm
+of the data points. This result implies that a smaller 2-norm of the weight
+vector implies a smaller complexity of the hypothesis class. This, indeed,
+aligns with a common practice in applications, where one adds the 2-norm of the
+weight vector to the loss function to prevent overfitting, see also
+\Cref{ex:classification} and \Cref{ex:regression}.
+\end{rmk}
 \section{Occam's Razor and the Overparameterization Regime}
+We have seen in this chapter that the unachievable task of minimizing the true
+risk can be replaced by the next best thing, i.e., minimizing an upperbound to
+it. In particular, this was suggested by upperbounds of the form
 $$
-	R_{\mathcal{P}_z}(\hat{h}^*) = \underbrace{\min_{h \in \mathfrak{H}} R_{\mathcal{P}_z}(h)}_{\text{approximation/training error}} + \underbrace{R_{\mathcal{P}_z}(\hat{h}^*) - \min_{h \in \mathfrak{H}} R_{\mathcal{P}_z}(h)}_{\text{estimation/test error}} 
+\text{true risk} \leq \text{empirical risk} + \text{complexity term}.
+$$
+But how do the empirical risk and the complexity term behave? Assume that we
+have two hypothesis classes that result in roughly similar empirical risk
+minimizers. In other words, for two different hypothesis class, running the ERM
+minimization algorithm returns hypothesis with similar empirical errors. Which
+of the two hypothesis classes is better? The guiding upperbound suggests that
+the hypothesis class with the smaller complexity term is better. So, in a sense,
+the Occam's razor principle is at play here; the simpler answer is better. 
+
+It turns out, however, that the relationship between the empirical risk and the
+complexity term is not straightforward. In particular, note that the empirical
+risk can be made arbitrarily small by increasing the expressivity of the
+hypothesis class. However, a more expressive hypothesis class is also more
+complex. For example, consider a certain classification task and let the
+hypothesis class be that of neural networks. Moreover, assume that we measure
+the complexity of the hypothesis class by the VC-dimension. To better fit the
+data, one can simply increase the number of learnable parameters $n_p$ in the neural
+network. However, one can also show that the VC-dimension of the hypothesis
+class is bounded by $\mathcal{O}(n_p \log n_p)$. This suggests that increasing
+the number of parameters in the neural network increases the complexity term. In
+summary, increasing the expressivity of the hypothesis class allows us to better
+fit the training data, but it also increases the complexity term, and hence the
+generalization error. This is known as bias-variance tradeoff and is a central
+concept in machine learning\footnote{Note that in practice, the test error is a
+proxy of the generalization error}.
+
+Indeed, the bias-variance tradeoff is an established concept in machine learning
+and statistics. It has been observed for multiple learning settings and a wide
+variety of hypothesis classes. However, lately, there has been a surge of
+counter examples. In particular, it has been observed that increasing the number
+of parameters in a neural network does not necessarily increase the
+generalization error. In fact, in many applications, one uses neural networks
+with a number of parameters that is much larger than the number of training data
+points and still obtains a very good generalization error. This phenomenon is
+known as overparameterization.
+
+Figure \cref{Fig:old_new} summarizes the clash between common wisdom and new observations.
+
+\begin{figure}[htbp]
+	\label{Fig:old_new}
+		\centering
+		\includegraphics[width=0.8\textwidth, height=0.2\textheight]{old_new.pdf}
+		\caption{Common wisdom and many empirical observations suggest that the training error decreases with the complexity of the hypothesis class. The test error decreases as well, only to increase again after a certain threshold as shown in the figure on the left. Here, the threshold usually corresponds to the point where the number of learnable parameters equals the size of the dataset. However, modern observations suggest that deep neural network can have many parameters and still generalize well as shown in the figure on the right.}
+\end{figure}
+Recently, there has been a lot of research to understand the phenomenon of
+overparameterization. While we will not delve into the details of this research,
+we look at a one specific example. 
+
+In~\cite{Neyshabur:arXiv1805} the authors looked at the complexity of one
+specific class of neural networks. In particular, they studied 2-layer neural
+networks with ReLU activation functions. These can be written as
+$$
+	\mathfrak{H} := \{h(x) = V \cdot [U\cdot x]_+: U, V \in W\},
+	$$
+	where
+	\begin{align*}
+	W :=& \{(U,V) \quad U \in \mathbb{R}^{n \times n_{\text{hu}}}, V \in \mathbb{R}^{n_\text{hu} \times n_{\text{class}}} \quad \text{and}\\
+	& \quad \|u_i-u_i^0\|_2 \leq \beta, \|v_i\|_2 \leq \alpha \quad \text{for all units}\}, 
+	\end{align*}
+	and $n_\text{hu}$ is the number of hidden units, $n_{\text{class}}$ is the
+	number of classes, $[.]_+$ denotes the ReLU activation function, $u_i$,
+	$v_i$ denote the $i$-th column of $U$ and $V$ for the trained neural
+	network respectively, and $u_i^0$, $v_i^0$ are the $i$-th column of the
+	initial weight matrix $U$, and $V$, respectively, $\beta$ and $\alpha$ are
+	constants.
+	
+	The authors studied empirically the dependence of the test error, a proxy of
+	the generalization error, on the complexity of this hypothesis class, which
+	they defined as the number of hidden units. 
+
+	It holds that
+	$$
+	\text{Rad}(l \circ \mathfrak{H} \circ D) \leq \frac{C}{\sqrt{m}} \max_i \|x_i\|_2 \ \alpha \ (\beta+ \|U^0\|_2)
 	$$
 
 \section*{Wait! What is what?}
@@ -881,6 +997,7 @@ Here is a list of questions that help you check your understanding of key
 concepts inside this chapter.
 
 \begin{enumerate}
-    \item tba. 
+    \item What is the goal of a supervised learning problem? 
+    \item  
 \end{enumerate}
 
