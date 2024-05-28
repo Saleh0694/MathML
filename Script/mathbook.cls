@@ -33,7 +33,10 @@
 \RequirePackage{amsfonts} % For additional mathematical fonts
 \RequirePackage{amssymb} % For additional mathematical symbols
 \RequirePackage{xcolor}
-\RequirePackage{hyperref} % For hyperlinks
+\definecolor{mildred}{RGB}{255,100,100}
+\definecolor{mildblue}{RGB}{100,100,255}
+\usepackage{hyperref} 
+\usepackage{cleveref} % If you want additional functionality, you can use cleveref
 \hypersetup{
     colorlinks=true,
     linkcolor=blue!60!green, % Dark blue color for internal links
@@ -199,3 +202,7 @@
 
 \RequirePackage{graphicx} % Required to include images
 \graphicspath{{Figures/}{./}} % Specifies where to look for included images
+
+% setup for figures 
+\usepackage{caption}
+\captionsetup{width=0.8\textwidth}
