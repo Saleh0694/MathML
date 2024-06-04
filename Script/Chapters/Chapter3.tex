@@ -7,5 +7,625 @@
 %\setcounter{section}{0}
 
 \section{Neural Networks}
-\section{Kernel Methods}
+
+
+
+
+
+\chapter{Kernel based approximation}
+
+
+Kernel based methods used to be one of the main tools for machine learning up about 15 years ago, 
+when neural networks became more popular.
+Nowadays they are still in use due to their rich theoretical background. 
+Recent interest was also spiked due to the so-called neural tangent kernel (NTK).
+
+The first part on the following sections on kernel based approximation in mainly based on \cite{wendland2005scattered},
+while the last part on the neural tangent kernel is based on recent literature \cite{jacot2018neural}.
+
+
+\section{Introduction \& Motivation}
+
+We start by discussing the following problem:
+
+\begin{problem}
+\label{prob:interpolation_problem}
+Consider $\Omega \subset \R^d$ and pairwise distinct points $X_N := \{ x_i \}_{i=1}^N \subset \Omega$ and target values $\{ f_i \}_{i=1}^N \subset \R$.
+Find a continuous function $s: \Omega \rightarrow \R$ that interpolates these values, i.e.\
+\begin{align}
+\label{eq:interpol_conditions}
+s(x_i) = f_i, \qquad i=1, ..., N.
+\end{align}
+\end{problem}
+
+There are two key important ingredients:
+\begin{itemize}
+\item Multivariate: We are not only interested in the univariate case $d=1$, but especially in the multivariate case $d>1$.
+\item Meshless: The points $X_N$ may be arbitrarily unstructured and scattered, in particular we do not need any mesh.
+\end{itemize}
+
+As a first example to solve this problem, we can consider the univariate case $d=1$:
+For the approximation of our problem, we pick an ansatz space $V$ with basis $\{ \phi_j \}_{j=1}^N \subset V$ and use the ansatz function
+\begin{align*}
+s(x) = \sum_{j=1}^N \alpha_j \phi_j(x).
+\end{align*}
+This ansatz function can be plugged into the system of equations from Eq.~\eqref{eq:interpol_conditions}, 
+which yields the linear equation system
+\begin{align}
+\label{eq:lin_eq_system_general}
+A_{\phi, X_N} \alpha := 
+\begin{pmatrix}
+\phi_1(x_1) & \phi_2(x_1) & \dots & \phi_N(x_1) \\
+\phi_1(x_2) & \phi_2(x_2) & \dots & \phi_N(x_2) \\
+\vdots & \vdots & \vdots & \vdots \\
+\phi_1(x_N) & \phi_2(x_N) & \dots & \phi_N(x_N) \\
+\end{pmatrix}
+\begin{pmatrix}
+\alpha_1 \\ \alpha_2 \\ \vdots \\ \alpha_N
+\end{pmatrix}
+=
+\begin{pmatrix}
+f_1 \\ f_2 \\ \vdots \\ f_N
+\end{pmatrix}.
+\end{align}
+In order to make this more explicit, we pick the space of polynomials of degree $N-1$ as our ansatz space, 
+i.e.\ $V := \pi_{N-1}(\R)$,
+and as basis we choose the monomials $\{ \phi_j \}_{j=1}^N = \{ x^{j-1} \}_{j=1}^N \subset \pi_{N-1}(\R)$.
+Thus the linear equation system Eq.~\eqref{eq:lin_eq_system_general} turns into
+\begin{align*}
+A_{\phi, X_N} \alpha := 
+\begin{pmatrix}
+1 & x_1 & \dots & x_1^{N-1} \\
+1 & x_2 & \dots & x_2^{N-1} \\
+\vdots & \vdots & \vdots & \vdots \\
+1 & x_N & \dots & x_N^{N-1} \\
+\end{pmatrix}
+\begin{pmatrix}
+\alpha_1 \\ \alpha_2 \\ \vdots \\ \alpha_N
+\end{pmatrix}
+=
+\begin{pmatrix}
+f_1 \\ f_2 \\ \vdots \\ f_N
+\end{pmatrix}.
+\end{align*}
+The occuring matrix $A_{\phi, X_N}$ is the so-called Vandermonde matrix, and we recall that its determinant is given as
+\begin{align*}
+\det(A_{\phi, X_n}) = \prod_{1 \leq i < j \leq N} (x_j - x_i).
+\end{align*}
+Like this we can easily see, that the linear equation system Eq.~\eqref{eq:lin_eq_system_general} is uniquely solvable as soon as the points $X_N$ are pairwise distinct.
+
+This example raises the following question:
+\begin{question}
+\label{question:01}
+Does this procedure -- fixing a basis, and then doing interpolation with arbitrary points $X_N$ -- always work, also in higher dimensions? 
+\end{question}
+
+The answer to this question will be \textit{no}, as we will see in the Mairhuber Curtis theorem \Cref{asdf}.
+In order to state and proof this theorem, we first need to introduce some mathematical notation:
+
+\begin{definition}
+	Let $\Omega \subset \R^d$ contain at least $N$ points and let $V \subseteq \mathcal{C}(\Omega)$ be an $N$-dimensional linear space. \\
+	The space $V$ is called a \underline{Haar space of dimension $N$ on $\Omega$},
+	if for arbitrary points $\{ x_i \} \subset \Omega$ and arbitrary values $\{ f_i \}_{i=1}^n \subset \R$ there exists a unique function $s \in V$ that satisfies 
+	\begin{align*}
+	s(x_i) = f_i \qquad i=1, ..., N.
+	\end{align*}
+\end{definition}
+
+The polynomial spaces which we encountered before are a first example of such a Haar space:
+
+\begin{example}
+Let $\Omega = [a, b] \subset \R$ for $a < b \in \R$. 
+Then $V = \pi_{N-1}(\Omega)$ (space of polynomials up to degree $N-1$ on $\Omega$) is a Haar space of dimension $N$ of $\Omega$.
+\end{example}
+
+The following proposition gives several equivalent statements on Haar spaces:
+
+\begin{prop}
+\label{prop:haar_space}
+Let $\Omega \subset \R^d$ contain at least $N$ points and let $V \subseteq \mathcal{C}(\Omega)$ be an $N$-dimensional linear space. \\
+Then the following statements are equivalent:
+\begin{enumerate}
+\item $V$ is an $N$-dimensional Haar space on $\Omega$
+\item Every $v \in V \setminus \{ 0 \}$ has at most $N-1$ distinct zeros
+\item For any set of pairwise distinct points $X_N \subset \Omega$ and any basis $\{ \phi_j \}_{j=1}^N$ of $V$, 
+the interpolation matrix $A_{\phi, X_N}$ is invertible, i.e.\ $\det(A_{\phi, X_N}) \neq 0$.
+\end{enumerate}
+\end{prop}
+
+
+\begin{proof}
+\begin{itemize}
+\item 1. $\Rightarrow$ 2.: We assume that $V$ is an $N$-dimensional Haar space on $\Omega$, 
+and that there is a $v \in V \setminus \{ 0 \}$ with (at least) $N$ distinct zeros $X_N \subset \Omega$.
+Additionaly we consider $u := 0$ (zero-function) and observe that $u \in V$ (as $V$ is a linear space).
+Especially we have $u \neq v$.
+Now, both $u$ and $v$ are distinct interpolants for the points $X_N$ with target values $f_i = 0$ for $i=1, ..., N$,
+which is a contradiction to the uniqueness of the interpolant within the definition of a Haar space.
+\item 2. $\Rightarrow$ 3.: We assume that there is a set of pairwise distinct points $X_N \subset \Omega$ and a basis $\{ \phi_j \}_{j=1}^N$ of $V$ such that the interpolation matrix is not invertible, i.e.\ it is singular.
+Then there is a vector $\alpha \in \R^N \setminus \{ 0 \}$ such that $A_{\phi, X_N} \alpha = 0$.
+As $\alpha \neq 0$, the function $v(x) := \sum_{j=1}^N \alpha_j \phi_j(x)$ is not the zero function.
+However $v$ has $N$ distinct zeros (namely in the points $X_N$), which is thus a contradiction:
+\begin{align*}
+v(x_i) = \sum_{j=1}^N \alpha_j \phi_j(x_i) = (A_{\phi, X_n} \alpha)_i = 0 \qquad \text{for all } i=1, ..., N.
+\end{align*}
+\item 3. $\Leftrightarrow$ 1.: The matrix $A_{\phi, X_N}$ is invertible if and only if $A_{\phi, X_N} \alpha = b$ has a unique solution of any $b = \{f_i \}_{i=1}^N$,
+which holds if and only if $\sum_{j=1}^N \alpha_j \phi_j(x_i) = f_i, i=1, ..., N$ has a unique solution $\alpha = \{ \alpha_j \}_{j=1}^N$,
+which holds if and only if $s(x) := \sum_{j=1}^N \alpha_j \phi_j(x)$ is the unique interpolant.
+\end{itemize}
+\end{proof}
+
+With these background knowledge on Haar spaces, we can frame \Cref{question:01} more precisely:
+
+\begin{question}
+\label{question:02}
+Is there any Haar space in dimension $d>1$?
+\end{question}
+As announced already before, the answer to this question will be no, as established by the famous Mairhuber-Curtis theorem:
+
+
+\begin{thm}[Mairhuber-Curtis]
+\label{th:mairhuber_curtis}
+Let $\Omega \subset \R^d$, $d>1$ be a set with nonempty interior.
+Then there exists no Haar space of dimension $N>1$ on $\Omega$.
+\end{thm}
+
+\begin{proof}
+For any $N$-dimensional space $V \subset \mathcal{C}(\Omega)$, we will show the existence of a set $X_N \subset \Omega$ of pairwise distinct points, 
+such that the interpolation matrix has determinant zero and is thus singular, 
+which is a contradiction to \Cref{prop:haar_space}:
+
+We assume $V:= \mathrm{span} \{ \phi_1, ..., \phi_N \} \subset \mathcal{C}(\Omega)$ to be a Haar space of dimension $N > 1$ on $\Omega$.
+As $\Omega$ has a nonempty interior, there exists a ball $B(x_0, \varepsilon) \subset \Omega$ for some $x_0 \in \Omega, \varepsilon > 0$.
+Now we consider pairwise distinct points $X_N = \{ x_1, ..., x_N \} \subset \Omega$ with $x_1, x_2 \in B(x_0, \varepsilon)$.
+As $V$ is assumed to be a Haar space, we have $\det(A_{\phi, X_N}) \neq 0$ by \Cref{prop:haar_space}. 
+
+Now we consider continuous curves $\gamma_1, \gamma_2: [0, 1] \rightarrow B(x_0, \varepsilon) \subset \Omega$ with $\gamma_1(0) = \gamma_2(1) = x_1$, $\gamma_2(0) = \gamma_1(1) = x_2$ that do not intersect in any other points, 
+that do not intersect themselves and that have no points in common with $\{x_3, ..., x_N\}$.
+This is possible due to the assumption $d>1$.
+Like this, $X_N(t) := \{ \gamma_1(t), \gamma_2(t), x_3, ..., x_N \}$ are pairwise distinct for any $t \in [0, 1]$.
+Due to \Cref{prop:haar_space}, we have $\det(A_{\phi, X_N(1)}) \neq 0$.
+
+Now we consider the function $D: [0, 1] \rightarrow \R, t \mapsto \det(A_{\phi, X_N(t)})$ and show that it changes sign:
+As $A_{\phi, X_N} = A_{\phi, X_N(0)}$ and $A_{\phi, X_N(1)}$ only differ by a permuation of the first two rows, 
+we have $D(1) = -D(0)$ and thus $D(0) D(1) < 0$.
+As the function $D(t)$ is continuous, there needs to be a $\tilde{t} \in (0, 1)$ such that $D(\tilde{t}) = 0$.
+This means that $X_N(\tilde{t})$ is a set of pairwise distinct points s.t.\ $A_{\phi, X_N(\tilde{t})}$ has determinant zero, which is a contradiction to \Cref{prop:haar_space}.
+\end{proof}
+
+
+The Mairhuber-Curtis theorem from \Cref{th:mairhuber_curtis} essentially tells us, 
+that it is not possible to choose the approximation space $V$ a-priori, i.e.\ independent of the points $X_N$. 
+In order to solve this issue, we will make use of kernels, which will allow us to use data-dependent approximation spaces.
+
+
+
+\section{Kernels}
+
+In this section, we will introduce the notion of a kernel as well as special classes of kernels 
+and discuss their basic properties.
+Finally we will see how interpolation can be done with kernels in a well defined way, circumventing the Mairhuber-Curtis theorem \Cref{th:mairhuber_curtis}.
+
+We start with the basic definition of a kernel:
+
+\begin{definition}
+Let $\Omega$ be a nonempty set. 
+\begin{itemize}
+\item A \underline{real-valued kernel on $\Omega$} is a symmetric function $k: \Omega \times \Omega \rightarrow \R$.
+\item A \underline{complex-valued kernel on $\Omega$} is a hermitian function $k: \Omega \times \Omega \rightarrow \R$.
+\end{itemize}
+\end{definition}
+
+In the following we will mainly focus on real-valued kernels and on kernel which are defined on $\Omega \subseteq \R^d$.
+However we note that kernels can be defined on very general sets that need not posses any structure, such as graphs, molecules or images.
+
+We continue with the definition of a kernel matrix, 
+which enables us to introduce the notion of positive definite (PD) and strictly positive-definite (SPD) kernels:
+
+\begin{definition}
+\label{def:positive_def_kernels}
+Let $\Omega$ be a nonempty set.
+\begin{itemize}
+\item For any $N \in \N$ and any set of $N$ pairwise distinct points $X_N := \{ x_i \}_{i=1}^N \subset \Omega$, the \underline{kernel matrix} $A := A_{k, X_N} \in \R^{N \times N}$ is defined as $A := [k(x_i, x_j)]_{i,j=1}^N$.
+\item A kernel $k$ on $\Omega$ is \underline{positive definite} (PD), if for all $N \in \N$ and all pairwise distinct points $X_N$ the kernel matrix $A$ is positive semi-definite, i.e.\
+\begin{align*}
+\textstyle \sum_{i,j=1}^N \alpha_i \alpha_j k(x_i, x_j) = \alpha^\top A \alpha \geq 0 \qquad \forall 0 \neq \alpha = \{ \alpha_i \}_{i=1}^N \in \R^N.
+\end{align*}
+\item A kernel $k$ on $\Omega$ is \underline{strictly positive definite} (SPD), if for all $N \in \N$ and all pairwise distinct points $X_N$ the kernel matrix $A$ is positive definite, i.e.\
+\begin{align*}
+\textstyle \sum_{i,j=1}^N \alpha_i \alpha_j k(x_i, x_j) = \alpha^\top A \alpha > 0 \qquad \forall 0 \neq \alpha = \{ \alpha_i \}_{i=1}^N \in \R^N.
+\end{align*} 
+\end{itemize}
+\end{definition}
+
+There is another important class of kernels, namely conditionally positive definite kernels, which are however not discussed in the following.
+It is worth to note, that some literature (e.g.\ \cite{wendland2005scattered}) does not use ``\textit{strictly} positive definite'' kernels, but uses directly ``positive definite'' kernels.
+
+In order to show why the notion of a strictly positive definite kernel is important, 
+we recall the following statement from linear algebra:
+
+\begin{prop}
+\label{prop:linear_algebra}
+Let $A \in \R^{N \times N}$ be a symmetric matrix. 
+Then the following are equivalent:
+\begin{enumerate}
+\item $A$ is positive definite, i.e.\ $\alpha^\top A \alpha > 0$ for all $0 \neq \alpha \in \R^N$.
+\item The eigenvalues $\{ \lambda_i \}_{i=1}^N$ of $A$ are positive
+\end{enumerate}
+In this case, it holds:
+\begin{itemize}
+\item $A$ is invertible with $\det(A) > 0$.
+\end{itemize}
+\end{prop}
+
+\begin{proof}
+As $A$ is symmetric, the spectral theorem gives an eigen-decomposition as $A = V\Lambda V^\top$ with $V, \Lambda \in \R^{N \times N}$, $V$ orthogonal and $\Lambda$ diagonal with the eigenvalues on its diagonal:
+\begin{itemize}
+\item 1. $\Rightarrow$ 2.: As $V$ is orthogonal, its columns $V_i$ form an orthonormal basis. Thus we can decompose any $0 \neq \alpha \in \R^N$ as $\alpha = \sum_{i=1}^N \beta_i V_i = V\beta$. Then we calculate:
+\begin{align*}
+\alpha^\top A \alpha = (\beta^\top V^\top)A(V \beta) = \beta^\top V^\top V \Lambda V^\top V \beta = \beta^\top \Lambda \beta = \sum_{i=1}^N \beta_i^2 \lambda_i.
+\end{align*}
+Thus $\lambda_i > 0$ implies $\alpha^\top A \alpha > 0$ for all $\alpha \neq 0$.
+\item 2. $\Rightarrow$ 1.: We have $\alpha^\top A \alpha > 0$ for any $\alpha \neq 0$, thus we pick $\alpha := V_i$ (column of $V$ as specified above), and have
+\begin{align*}
+0 < V_i^\top A V_i \lambda_i V_i^\top V_i = \lambda_i.
+\end{align*}
+\end{itemize}
+If all the eigenvalues are positive, also the determinant is positive due to $\det(A) = \prod_{i=1}^N \lambda_i$.
+\end{proof}
+
+\Cref{def:positive_def_kernels} in conjunction with \Cref{prop:linear_algebra} now allows us to show how strictly positive definite kernels can be used for our inteprolation problem \Cref{prob:interpolation_problem}:
+
+
+\begin{thm}
+Let $\Omega \subset \R^d$ and let $k$ be a SPD kernel on $\Omega$. 
+For any set $\{ x_i \}_{i=1}^N \subset \Omega$ of pairwise distinct points and corresponding target values $\{ f_i \}_{i=1}^N \subset \R$,
+there exists a unique kernel interpolant
+\begin{align*}
+s(x) := \sum_{j=1}^N \alpha_j k(x, x_j)
+\end{align*}
+that satisfies $s(x_i) = f_i$ for all $i=1, ..., N$. 
+\end{thm}
+
+\begin{proof}
+The interpolation conditions $s(x_i) = f_i$ for all $i=1, ..., N$ yield to the linear system of equations
+\begin{align}
+\label{eq:lin_eq_system_kernel}
+A_{k, X_N} \alpha := 
+\begin{pmatrix}
+k(x_1, x_1) & k(x_1, x_2) & \dots & k(x_1, x_N) \\
+k(x_2, x_1) & k(x_2, x_2) & \dots & k(x_2, x_N) \\
+\vdots & \vdots & \vdots & \vdots \\
+k(x_N, x_1) & k(x_N, x_2) & \dots & k(x_N, x_N) \\
+\end{pmatrix}
+\begin{pmatrix}
+\alpha_1 \\ \alpha_2 \\ \vdots \\ \alpha_N
+\end{pmatrix}
+=
+\begin{pmatrix}
+f_1 \\ f_2 \\ \vdots \\ f_N
+\end{pmatrix}.
+\end{align}
+The matrix $A_{k, X_N}$ is exactly the kernel matrix from \Cref{def:positive_def_kernels},
+and due to the assumption on the kernel to be SPD, this matrix is positive definite.
+By \Cref{prop:linear_algebra} we have $\det(A_{k, X_N}) > 0$, thus this linear system of equations is uniquely solvable.
+\end{proof}
+
+As we saw that (strictly positive definite) kernels can be used for interpolation, 
+we will give two examples of kernels:
+
+
+\begin{example}
+\label{ex:kernels}
+\begin{itemize}
+\item The linear kernel is defined as $k: \R^d \times \R^d: (x, z) \mapsto (x, z)_{\R^d}$. 
+It simply returns the inner product of two points $x, z \in \R^d$.
+It is easy to see, that the linear kernel is positive definite kernel, but not strictly positive definite.
+\item The Gaussian kernel is defined as $k: \R^d \times \R^d: (x, z) \mapsto \exp(-\Vert x - z \Vert^2)$.
+It makes use of the negative squared exponential of the distance between two data points, and is thus a first example of a ``radial basis function kernel''.
+The Gaussian kernel can be shown to be strictly positive definite.
+\end{itemize}
+\end{example}
+
+
+
+The linear kernel was a first example of a kernel, which is defined with help of a ``feature map''.
+For these kind of kernels, one can directly show the positive definiteness:
+
+\begin{thm}
+Let $\Omega$ be a set, $H$ a Hilbert space and $\phi: \Omega \rightarrow H$ a mapping (\underline{feature map}).
+Then the kernel 
+\begin{align*}
+k(x, z) := (\phi(x), \phi(z))_{H}
+\end{align*}
+is positive definite.
+\end{thm}
+
+\begin{proof}
+We verify the condition from the definition in \Cref{def:positive_def_kernels}:
+\begin{align*}
+\sum_{i,j=1}^N \alpha_i \alpha_j k(x_i, x_j) &= \sum_{i, j=1}^N \alpha_i \alpha_j (\phi(x_i), \phi(x_j))_H 
+= (\sum_{i=1}^N \alpha_i \phi(x_i), \sum_{j=1}^N \alpha_j \phi(x_j) )_H \\
+&= \left \Vert \sum_{i=1}^N \alpha_i \phi(x_i) \right \Vert_H^2 \geq 0.
+\end{align*}
+\end{proof}
+
+
+
+We continue with some further elementary properties on kernels:
+
+\begin{prop}
+Let $k: \Omega \times \Omega \rightarrow \R$ be a PD kernel. Then:
+\begin{itemize}
+\item Non-negativity of the diagonal: 
+\begin{align*}
+k(x, x) \geq 0 \qquad \text{for all ~} x \in \Omega
+\end{align*}
+\item Cauchy-Schwarz inequality: 
+\begin{align*}
+k(x, z)^2 \leq k(x, x)k(z,z) \qquad \text{for all ~} x, z \in \Omega.
+\end{align*}
+\end{itemize}
+If $k$ is SPD, then the same holds using ``$>$'' instead of ``$\geq$''.
+\end{prop}
+
+\begin{proof}
+\begin{itemize}
+\item We consider $N := 1$ and $X_1 = \{ x\}, \alpha = 1$. 
+Then the positive definiteness implies $\alpha^\top A \alpha = k(x, x) \geq 0$.
+\item We consider $N := 2$ and $X_2 = \{ x, z \}$. 
+Then we have
+\begin{align*}
+A_{k, X_N} = \begin{pmatrix}
+k(x, x) & k(x, z) \\
+k(z, x) & k(z, z).
+\end{pmatrix}
+\end{align*}
+By \Cref{prop:linear_algebra} we have $0 \leq \det(A_{k, X_N}) = k(x, x) k(z, z) - k(x, z)^2$, which can be rearranged to give the statement.
+\end{itemize}
+\end{proof}
+
+The following proposition allows us to build new kernels, while maintaining their (strict) positive definiteness properties:
+
+\begin{prop}
+\label{prop:build_kernels}
+Let $k_1, k_2: \Omega \times \Omega \rightarrow \R$ be PD kernels,
+$f: \Omega \rightarrow \Omega$ and $g: \Omega \rightarrow \R$, $\Omega' \subset \Omega$. 
+Then the following kernels are also PD (SPD):
+\begin{enumerate}
+\item $k: \Omega' \times \Omega' \rightarrow \R$ with $k := (k_1)|_{\Omega' \times \Omega'}$ \hfill (SPD if $k_1$ is SPD)
+\item $k(x, z) := k_1(x, z) + k_2(x, z)$ \hfill (SPD if $k_1$ or $k_2$ is SPD)
+\item $k(x, z) := \alpha k_1(x, z)$ for $\alpha \geq 0$ \hfill (SPD if $k_1$ is SPD and $\alpha > 0$)
+\item $k(x, z) := k_1(x, z) k_2(x, z)$ \hfill (SPD if both $k_1$ and $k_2$ are SPD)
+\item $k(x, z) := \exp(k_1(x, z))$ 
+\item $k(x, z) := k_1(f(x), f(z)))$ \hfill (SPD if $k_1$ is SPD and $f$ is injective)
+\item $k(x, z) := g(x)g(z)$
+\item $k(x, z) := g(x)k_1(x, z)g(z)$ \hfill (SPD if $k_1$ is SPD and $g(x) \neq 0$)
+\end{enumerate}
+
+\end{prop}
+
+The proofs are rather elementary and mostly directly follow from the definitions -- and are thus left as a (voluntary) homework.
+
+Finally we will see, that the Gaussian kernel from \Cref{ex:kernels} is SPD:
+
+\begin{prop}
+The Gaussian kernel $k: \Omega \times \Omega \rightarrow \R$ for $\Omega \subset \R^d$ given as
+\begin{align*}
+k(x, z) = \exp(-\Vert x - z \Vert^2)
+\end{align*}
+is strictly positive definite.
+\end{prop}
+
+\begin{proof}
+We start with the case $d=1$.
+We will make use of the Fourier transform and its inverse, which are given as
+\begin{align*}
+\mathcal{F}[f](\omega) &:= \frac{1}{\sqrt{2\pi}} \cdot \int_{-\infty}^\infty \exp(-ix\omega) f(x) ~ \mathrm{d}x \\
+\mathcal{F}^{-1}[\hat{f}](x) &:= \frac{1}{\sqrt{2\pi}} \cdot \int_{-\infty}^\infty \exp(ix\omega) \hat{f}(\omega) ~ \mathrm{d}\omega
+\end{align*}
+For our Gaussian kernel, we recall the following:
+\begin{align*}
+\mathcal{F} \left[\exp(-x^2) \right](x) &=  \frac{1}{\sqrt{2}} \cdot \exp(-\omega^2 / 4) =: \hat{\Phi}(\omega) \quad \Leftrightarrow \quad
+\exp(-x^2) = \mathcal{F}^{-1} \left[\frac{1}{\sqrt{2}} \cdot \exp(-\omega^2 / 4) \right](x).
+\end{align*}
+With this, we can straightforward compute:
+\begin{align*}
+\alpha^\top A_{k, X_N} \alpha &= \sum_{j, l=1}^N \alpha_j \alpha_l k(x_j, x_l) = \sum_{j, l=1}^N \alpha_j \alpha_l e^{-(x_j - x_l)^2} \\
+&= \frac{1}{\sqrt{2\pi}} \cdot \sum_{j, l=1}^N \alpha_j \alpha_l \int_{-\infty}^\infty e^{i(x_j - x_l)\omega} \hat{\Phi}(\omega) ~ \mathrm{d}\omega \\
+&= \frac{1}{\sqrt{2\pi}} \cdot \int_{-\infty}^\infty \hat{\Phi}(\omega) \cdot \left| \sum_{j=1}^N \alpha_j e^{ix_j \omega} \right|^2 ~ \mathrm{d}\omega.
+\end{align*}
+Since $\hat{\Phi}(\omega) > 0$ and $\left| \sum_{j=1}^N \alpha_j e^{ix_j \omega} \right|^2 > 0$ a.e.\ (as $X_N$ are pairwise distinct),
+we have $\alpha^\top A_{k, X_N} \alpha$.
+
+The general case $d>0$ follows from the observation
+\begin{align*}
+\exp(-\Vert x - z \Vert^2) = \exp(-\sum_{i=1}^d (x^{(i)} - z^{(i)})^2) = \prod_{i=1}^d \exp(-(x^{(i)} - z^{(i)})^d)
+\end{align*}
+and an application of \Cref{prop:build_kernels}.
+
+\end{proof}
+
+It the previous proof it is worth to note, that the whole proof works as long as $\hat{\Phi}(\omega) > 0$, i.e.\ it can also be leveraged for other kernels.
+This is indeed done for so-called ``translational invariant'' or ``radial basis funtion'' kernels.
+
+
+
+
+
+
+
+\section{Reproducing kernel Hilbert spaces}
+
+In the previous section we saw that kernel interpolation is well defined.
+Now we want to consider the approximation of functions with kernel interpolation.
+The properties of this approximation will for sure depend on the class of functions and on the kernel which we consider. 
+In the following we will see, that there is a ``native space'' of functions, for which this works well, the so-called reproducing kernel Hilbert space (RKHS).
+Within this space, we will be able to derive a  comprehensive analysis.
+We start with the definition of a reproducing kernel Hilbert space:
+
+
+\begin{definition}
+\label{def:rkhs}
+Let $\Omega$ be a nonempty set, $\mathcal{H}$ a Hilbert space of function $f: \Omega \rightarrow \R$ with inner product $(\cdot, \cdot)_{\Ha}$. \\
+$\Ha$ is called a \underline{Reproducing Kernel Hilbert space} (RKHS) on $\Omega$,
+if there exists a function $k: \Omega \times \Omega \rightarrow \R$ (the \underline{reproducing kernel}) such that
+\begin{enumerate}
+\item $k(\cdot, x) \in \Ha$ for all $x \in \Omega$
+\item $(f, k(\cdot, x))_{\Ha} = f(x)$ for all $x \in \Omega, f \in \Ha$ (\underline{reproducing property})
+\end{enumerate}
+\end{definition}
+
+The first point ensures, that the kernel (with fixed second argument) is a function itself within this Hilbert space of functions.
+The second point, the so called reproducing property, shows that the Riesz representer of the point evaluation functional $\delta_x$ is given by $k(\cdot, x)$.
+
+We continue with an easy example of an RKHS on $\Omega = (0, 1)$:
+
+\begin{example}
+Consider $\Omega = (0, 1)$ and the the Sobolev space $H_0^1(\Omega)$:
+\begin{align*}
+H_0^1(\Omega) := \{ f: [0, 1] \rightarrow \R, f \in L^2(\Omega), f' \in L^2(\Omega), f(0) = f(1) = 0 \}
+\end{align*}
+with inner product defined as
+\begin{align*}
+(f, g)_{H_0^1(\Omega)} := \int_0^1 f'(y) g'(y) ~ \mathrm{d}y
+\end{align*}
+Then $H_0^1(\Omega)$ is a RKHS on $\Omega$ with reproducing kernel given by
+\begin{align*}
+k(x, z) = \min(x, z) - xz = 
+\begin{cases}
+x(1-z) & \quad x < z \\
+z(1-x) & \quad x \geq z.
+\end{cases}
+\end{align*}
+
+Indeed we can quickly verify the two properties of an RKHS from \Cref{def:rkhs}: 
+For the first property, we can straightforward compute $\frac{\mathrm{d}}{\mathrm{d}y} k(y, x)$ and $k(0, x)$ and $k(1, x)$ to see that $k(\cdot, x) \in H_0^1(\Omega)$.
+For the second property, we calculate for any $f \in H_0^1(\Omega)$:
+\begin{align*}
+(f, k(\cdot, x))_{H_0^1(\Omega)} &= \int_0^1 f'(z) \frac{\mathrm{d}}{\mathrm{d}z} k(z, x) ~ \mathrm{d}z \\
+&= \int_0^x f'(z) \frac{\mathrm{d}}{\mathrm{d}z} k(z, x) ~ \mathrm{d}z + \int_x^1 f'(z) \frac{\mathrm{d}}{\mathrm{d}z} k(z, x) ~ \mathrm{d}z \\
+&= \int_0^x f'(z) (1-x) ~ \mathrm{d}z + \int_x^1 f'(z) (-x) ~ \mathrm{d}z \\
+&= (1-x) (f(x) - f(0)) - x (f(1) - f(x)) \\
+&= f(x),
+\end{align*}
+where we used $f(0) = f(1) = 0$ in the final step.
+\end{example}
+
+The following proposition shows that linear combinations of $k(\cdot, x_i)$ are included in the RKHS, and how to compute the inner products of such linear combinations. 
+Both properties directly follow from the definition of the RKHS by leveraging the linearity of Hilbert spaces.
+
+\begin{prop}
+Let $\Ha$ be a RKHS on $\Omega$ with reproducing kernel $k$. 
+Let $N, M \in \N$, $\alpha \in \R^N, \beta \in \R^M$ and $X_N, Z_M \subset \Omega$ and consider
+\begin{align*}
+f = \sum_{i=1}^N \alpha_i k(\cdot, x_i), ~ g = \sum_{j=1}^M \beta_j k(\cdot, z_j).
+\end{align*}
+Then it holds
+\begin{enumerate}
+\item $f, g \in \Ha$,
+\item $(f, g)_{\Ha} = \sum_{i=1}^N \sum_{j=1}^M \alpha_i \beta_j k(x_i, z_j)$ 
+\end{enumerate}
+\end{prop}
+
+\begin{proof}
+\begin{enumerate}
+\item By the first property within the definiton of the RKHS in \Cref{def:rkhs}, 
+we have that $k(\cdot, x_i) \in \Ha$ for all $i=1, ..., N$ as well as $k(\cdot, z_j) \in \Ha$ for all $j = 1, ..., M$.
+Since $H$ is a Hilbert space (by definition), it is a linear space, 
+and thus also the linear combinations $f$ and $g$ are within $\Ha$.
+\item To compute the inner product between $f$ and $g$, we leverage the reproducing property (second property within \Cref{def:rkhs} and make use of the linearity of the inner product:
+\begin{align*}
+(f, g) &= (\sum_{i=1}^N \alpha_i k(\cdot, x_i), \sum_{j=1}^M \beta_j k(\cdot, z_j))_{\Ha} \\
+&= \sum_{i=1}^N \sum_{j=1}^M \alpha_i \beta_j (k(\cdot, x_i),  k(\cdot, z_j))_{\Ha} \\
+&= \sum_{i=1}^N \sum_{j=1}^M \alpha_i \beta_j k(x_i, z_j).
+\end{align*}
+\end{enumerate}
+
+\end{proof}
+
+
+
+
+%
+%
+%
+%% \section{Basic properties and examples}
+%\section{Kernels}
+%
+%This lecture: Definition of kernels, kernel interpolation, basic properties
+%
+%\begin{itemize}
+%\item Definition kernel, kernel matrix, pd and spd
+%\item (criteria for spd)
+%\item Theorem: Kernel interpolation is well defined
+%\item properties of (s)pd kernels
+%\item basic operations of kernels (sum, scalar, product, exponential, ...
+%\item examples of kernels: linear kernel, Gaussian kernel + Fourier + remark for RBF kernels, kernels via feature maps
+%\end{itemize}
+
+
+%Section 2: Basic properties and examples of kernels
+%	- 2.1 Criteria for (s)pd kernels
+%			Prop 2.3: i) and iii)
+%	- 2.2 Properties of (s)pd kernels
+%	- 2.3 Basic operations on kernels
+%			o Gaussian kernel
+
+
+% \section{Kernels and Hilbert spaces}
+%\section{Reproducing kernel Hilbert spaces}
+%
+%\begin{itemize}
+%\item definition RKHS + example $H_0^1$
+%\item Proposition 3.5 + Characterizations
+%\item Theorem Aronszajn: Existence of RKHS
+%\item Feature map: Kernel feature map, other feature maps (Gaußkern, $L^2$ feature space)
+%\item RKHS and smoothness, basic operations on RKHS
+%\end{itemize}
+%
+%
+%%Section 3: Kernels and Hilbert spaces
+%%	- 3.1: Reproducing kernel Hilbert spaces
+%%			o Definition 3.2 
+%%			o Theorem 3.6
+%%	- 3.2: The native space of a PD kernel
+%%			o Theorem 3.10 (Aronszajn)
+%%			o Prop 3.12: Kernel feature map
+%%			o Prop 3.14 i)
+%%			o Prop 3.15: Basic operations on kernels
+%
+%\section{Interpolation in RKHS}
+%
+%\begin{itemize}
+%\item Interpolation as orthogonal projection + orthogonal decomposition
+%\item Interpolation gives best approximation + minimal norm interpolation
+%\item Error bounds: Definition power function, alternative form, basic properties
+%\end{itemize}
+%
+%
+%
+%%Section 4: Interpolation in native spaces
+%%			o Prop 4.1 (Interpolation in the native space)
+%%			o Cor 4.2 (Orthogonal decomp)
+%%	- 3.1: Optimality of kernel interpolation
+%%			o Prop 4.3 (Interpolation gives best approximation)
+%%			o Prop 4.4 (Minimal norm interpolation)
+%
+%
+%\section{Kernels and Neural networks}
+%
+%\begin{itemize}
+%\item Remark that we aim at providing some intuition, without discussing all mathematical details.
+%It is about ongoing research
+%\item (Short discussion of NNGP)
+%\item Jupyter notebooks: Empirical findings: Weights change only little
+%% \item Follow https://pages.cs.wisc.edu/~yliang/cs839_spring22/documents/0301-lec11-NTK-1.pdf
+%\item Neural network training, solving the ODE (follow Section ``Gradient Flow'' within \url{https://rajatvd.github.io/NTK/}) + remark/discussion in which limits this hold
+%\item NTK for two-layer NN
+%\item Jupyter notebook: Show that training and NTK prediction actually match
+%\end{itemize}
+%
+
+
 %----------------------------------------------------------------------------------------
