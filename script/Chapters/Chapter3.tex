@@ -209,6 +209,7 @@ Finally we will see how interpolation can be done with kernels in a well defined
 We start with the basic definition of a kernel:
 
 \begin{definition}
+\label{def:kernel}
 Let $\Omega$ be a nonempty set. 
 \begin{itemize}
 \item A \underline{real-valued kernel on $\Omega$} is a symmetric function $k: \Omega \times \Omega \rightarrow \R$.
@@ -333,6 +334,7 @@ The linear kernel was a first example of a kernel, which is defined with help of
 For these kind of kernels, one can directly show the positive definiteness:
 
 \begin{thm}
+\label{th:feature_map_kernel}
 Let $\Omega$ be a set, $H$ a Hilbert space and $\phi: \Omega \rightarrow H$ a mapping (\underline{feature map}).
 Then the kernel 
 \begin{align*}
@@ -499,7 +501,9 @@ z(1-x) & \quad x \geq z.
 \end{cases}
 \end{align*}
 
-Indeed we can quickly verify the two properties of an RKHS from \Cref{def:rkhs}: 
+As a technical note it is worth to realize, that $H_0^1(\Omega)$ consists of continuous functions due to the Sobolev embedding theorem.
+
+Now we can quickly verify the two properties of an RKHS from \Cref{def:rkhs}: 
 For the first property, we can straightforward compute $\frac{\mathrm{d}}{\mathrm{d}y} k(y, x)$ and $k(0, x)$ and $k(1, x)$ to see that $k(\cdot, x) \in H_0^1(\Omega)$.
 For the second property, we calculate for any $f \in H_0^1(\Omega)$:
 \begin{align*}
@@ -516,6 +520,7 @@ The following proposition shows that linear combinations of $k(\cdot, x_i)$ are 
 Both properties directly follow from the definition of the RKHS by leveraging the linearity of Hilbert spaces.
 
 \begin{prop}
+\label{prop:rkhs_1}
 Let $\Ha$ be a RKHS on $\Omega$ with reproducing kernel $k$. 
 Let $N, M \in \N$, $\alpha \in \R^N, \beta \in \R^M$ and $X_N, Z_M \subset \Omega$ and consider
 \begin{align*}
@@ -544,12 +549,573 @@ and thus also the linear combinations $f$ and $g$ are within $\Ha$.
 
 \end{proof}
 
+The following theorem shows that any RKHS has a kernel, that this kernel is unique, and that it is (at least) PD:
+
+
+\begin{thm}
+\label{thm:rkhs_1}
+Let $\Ha$ be a RKHS on $\Omega$ with reproducing kernel $k$.
+Then $k$ is unique and it is a PD kernel.
+\end{thm}
+
+\begin{proof}
+For any $x, z \in \Omega$ we define $f := k(\cdot, x)$ and $g := k(\cdot, z)$.
+From \Cref{prop:rkhs_1} we obtain $k(x, z) = (f, g)_{\Ha} = (g, f)_{\Ha} = k(z, x)$.
+Thus this definition yields a valid kernel according to \Cref{def:kernel}.
+
+We continue by proving the PDness of the kernel:
+Let $X_N \subset \Omega$ be pairwise distinct and $0 \neq \alpha \in \R^N$, then we have for the kernel matrix $A$
+\begin{align}
+\label{eq:proof_calc_1}
+\begin{aligned}
+\alpha^\top A \alpha &= \sum_{i,j=1}^N \alpha_i \alpha_j k(x_i, x_j) = \left( \sum_{j=1}^N \alpha_i k(\cdot, x_i), \sum_{j=1}^N \alpha_j k(\cdot, x_j) \right)_{\Ha} \\
+&= \left \Vert \sum_{i=1}^N \alpha_i k(\cdot, x_i) \right \Vert_{\Ha}^2 \geq 0.
+\end{aligned}
+\end{align}
+Finally it is left to show that the kernel is unique.
+For this assume that $k_1$ and $k_2$ are both reproducing kernels. 
+By \Cref{def:rkhs} we know that $k_1(\cdot, x) \in \Ha$ as well as $k_2(\cdot, z) \in \Ha$.
+By using the reproducing properties, we have
+\begin{align*}
+k_1(x, z) = k_1(z, x) = (k_1(\cdot, x), k_2(\cdot, z))_{\Ha} = (k_2(\cdot, z), k_1(\cdot, x))_{\Ha} = k_2(x, z),
+\end{align*}
+which shows that $k_1 = k_2$.
+\end{proof}
+
+
+Note that we cannot conclude SPD of the kernel, because within \Cref{eq:proof_calc_1} it may happen that $\{ k(\cdot, x_i) \}_{i=1}^N$ are linearly independent.
+In \Cref{prop:riesz_rksh} we will see, 
+that the linear independence of $\{ k(\cdot, x_i) \}_{i=1}^N$ is actually equivalent to the SPDness of the kernel.
+
+
+To continue, we need to recall the Riesz representer theorem from Hilbert space theory (functional analysis).
+We start with the definition of the dual space.
+
+\begin{definition}
+For a Hilbert space $\Ha$, the dual space $\Ha'$ consists of all linear and continuous functionals $\lambda: \Ha \rightarrow \R$ with norm
+\begin{align*}
+\Vert \lambda \Vert_{\Ha'} := \sup_{0 \neq f \in \Ha} \frac{|\lambda(f)|}{\Vert f \Vert_{\Ha}}.
+\end{align*}
+\end{definition}
+
+\begin{thm}[Riesz representer theorem]
+\label{thm:riesz_representer_theorem}
+Let $\Ha$ be a Hilbert space and denote as $\Ha'$ its dual.
+Then for all $\lambda \in \Ha'$ there exists a unique $v_\lambda \in \Ha$ (\underline{Riesz representer} of $\lambda$) such that
+\begin{align*}
+\lambda(f) = (v_\lambda, f)_{\Ha} \qquad \text{for all ~} f \in \Ha.
+\end{align*}
+Furthermore it holds $\Vert \lambda \Vert_{\Ha'} = \Vert v_\lambda \Vert_{\Ha}$.
+\end{thm}
+
+The Riesz representer theorem now allows us to further characterize RKHS:
+
+
+\begin{prop}
+\label{prop:riesz_rksh}
+Let $\Omega$ be a nonempty set and $\Ha$ a Hilbert space of functions $f: \Omega \rightarrow \R$. 
+Then
+\begin{enumerate}
+\item $\Ha$ is a RKHS $\Leftrightarrow$ all point evaluation functionals are continuous
+\end{enumerate}
+If $\Ha$ is a RKHS with kernel $k$, then
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item $k(\cdot, x)$ is the Riesz representer of the point evaluation functional $\delta_x \in \Ha'$
+\item $k$ is SPD $\Leftrightarrow$ $\{ \delta_x, x \in \Omega \}$ are linearly independent
+\item $|f(x)| \leq \sqrt{k(x, x)} \Vert f \Vert_{\Ha}$ for all $f \in \Ha, x \in \Omega$.
+\item Convergence in $\Ha$ implies pointwise convergence
+\end{enumerate}
+\end{prop}
+
+
+\begin{proof}
+\begin{enumerate}
+\item Let $\Ha$ be a RKHS, i.e.\ there exists a reproducing kernel $k$.
+Then we have for the point evaluation functional $\delta_x$
+\begin{align}
+\label{eq:proof_calc_2}
+|\delta_x(f)| = |f(x)| = |(f, k(\cdot, x))_{\Ha}|
+\leq \Vert f \Vert_{\Ha} \cdot \Vert k(\cdot, x) \Vert_{\Ha}
+=  \Vert f \Vert_{\Ha} \cdot \sqrt{k(x, x)},
+\end{align}
+i.e.\ the point evaluation functional is bounded and thus continuous.
+
+Let $\delta_x \in \Ha'$, then 
+\Cref{thm:riesz_representer_theorem} gives a Riesz representer $v_{\delta_x} \in \Ha$.
+We now define $k(\cdot, x) := v_{\delta_x} \in \Ha$:
+We have $k(\cdot, x) \in \Ha$ and $(f, k(\cdot, x) = (f, v_{\delta_x} = f(x)$ for all $x \in \Omega$.
+Thus $\Ha$ has a reproducing kernel and thus is an RKHS.
+\item The reproducing property yields $(f, k(\cdot, x)) = f(x)$ for all $x \in \Omega$. 
+Furthermore $k(\cdot, x) \in \Ha$ and the Riesz representer is unique.
+\item First we show that a finite set of linear functionals is linearly independent if and only if the corresponding Riesz representer are linearly independent:
+\begin{itemize}
+\item[] Let $\lambda_1, ..., \lambda_N$ be $N$ linearly independent functionals and $v_{\lambda_1}, ..., v_{\lambda_n}$ their corresponding Riesz representers.
+We consider for any $f \in \Ha$
+\begin{align*}
+0 = \sum_{j=1}^N \alpha_j \lambda_j(f) = (\sum_{j=1}^N \alpha_j v_{\lambda_j},  f)_{\Ha}
+\end{align*}
+which can only hold for $\alpha_j = 0, j=1, ..., N$ due to the linear independence of the functionals $\lambda_1, ..., \lambda_N$.
+Picking $f := \sum_{j=1}^N \alpha_j v_{\lambda_j}$ shows that also $v_{\lambda_1}, ..., v_{\lambda_N}$ are linearly independent.
+\end{itemize}
+In order to prove the equivalence of $k$ being SPD to $\{\delta_x, x\in\Omega\}$ being linearly independent, 
+we can leverage the computation within \Cref{thm:rkhs_1},
+but now we can conclude $``>''$ instead of $``\geq''$ within Eq.~\eqref{eq:proof_calc_1} due to $\{\delta_x, x\in\Omega\}$ and thus $\{ k(\cdot, x), x \in \Omega \}$ being linearly independent.
+\item This was already shown in Eq.~\eqref{eq:proof_calc_2}.
+\item Let $f_n \rightarrow f$ with $f, f_n \in \Ha$.
+Then, by the previous point, we obtain
+\begin{align*}
+|(f-f_n)(x)| \leq \sqrt{k(x, x)} \cdot \Vert f - f_n \Vert_{\Ha} \rightarrow 0.
+\end{align*}
+
+\end{enumerate}
+\end{proof}
+
+
+In practice, we rarely start with the RKHS and think about its kernel. 
+More frequently, 
+we work with a kernel and are interested about its RKHS.
+The following theorem gives this implication, i.e.\ how to obtain the RKHS from the kernel.
+
+\begin{thm}[Moore-Aronszajn]
+\label{th:moore_aronszajn}
+Let $\Omega$ be a nonempty set and $k: \Omega \times \Omega \rightarrow \R$ a positive definite kernel.
+Then there exists a unique RKHS $\ns$ with reproducing kernel $k$.
+\end{thm}
+
+\begin{proof}
+The proof is constructive.
+Due to \Cref{prop:rkhs_1}, we know that the finite linear combinations $\sum_{i=1}^N \alpha_i k(\cdot, x_i)$ are contained in the RKHS.
+We will show, that the RKHS is given by the completion of the space given by the span of all such linear combinations:
+
+We define
+\begin{align*}
+\Ha_0 := \mathrm{span} \{ k(\cdot, x), x \in \Omega \}
+\end{align*}
+as the space of all finite linear combinations of kernel functions with fixed second argument $x \in \Omega$.
+We consider any two functions $f, g \in \Ha_0$.
+By definition of $\Ha$, they can be expressed as
+\begin{align}
+\label{eq:representation_f_g}
+\begin{aligned}
+f = \sum_{i=1}^N \alpha_i k(\cdot, x_i), \\
+g = \sum_{j=1}^M \beta_j k(\cdot, x_j),
+\end{aligned}
+\end{align}
+where we can assume that $\{x_i\}_{i=1}^N \subset \Omega$ and $\{x_j\}_{i=1}^N \subset \Omega$ are each pairwise distinct.
+For any such two functions $f, g$, 
+we define an bilinear mapping $\mathcal{B}: \Ha_0 \times \Ha_0 \rightarrow \R$ as 
+\begin{align*}
+\mathcal{B}(f, g) = \mathcal{B} \left( \sum_{i=1}^N \alpha_i k(\cdot, x_i), \sum_{j=1}^M \beta_j k(\cdot, x_j) \right ) 
+:= \sum_{i=1}^N \sum_{j=1}^M \alpha_i \beta_j k(x_i, x_j).
+\end{align*}
+We show that this mapping is well-defined, symmetric, bilinear and positive semi-definite:
+\begin{itemize}
+\item By definition of $f$ and $g$, it holds
+\begin{align*}
+\mathcal{B}(f, g) = \sum_{i=1}^N \sum_{j=1}^M \alpha_i \beta_j k(x_i, x_j) = \sum_{i=1}^N \alpha_i g(x_i) = \sum_{j=1}^M \beta_j f(x_j),
+\end{align*}
+i.e.\ the value of $\mathcal{B}(f, g)$ does not depend on the actual representation of $f, g$ within Eq.~\eqref{eq:representation_f_g} (which does not need to be unique),
+and thus $\mathcal{B}(f, g)$ is well defined.
+\item The symmetry follows directly from the definition of $\mathcal{B}$ and the symmetry of the kernel $k$.
+\item The bilinearity follows as well directly from the definition of $\mathcal{B}$.
+\item For the positive semi-definiteness, we compute
+\begin{align*}
+\mathcal{B}(f, f) = \sum_{i=1}^N \sum_{j=1}^N \alpha_i \alpha_j k(x_i, x_j) = \alpha^\top A \alpha \geq 0
+\end{align*}
+by the positive definiteness of the kernel $k$.
+\end{itemize}
+With these properties it follows that $\mathcal{B}$ is a semi inner product on $\Ha_0$, 
+i.e.\ we can define $(f, g)_{\Ha_0} := \mathcal{B}(f, g)$ for $f, g \in \Ha_0$.
+Especially, $\Vert f \Vert_{\Ha_0} \equiv \sqrt{(f, f)_{\Ha_0}}$ defines a semi-norm.
+
+Now we show that $k$ is a reproducing kernel in $\Ha_0$:
+Obviously we have $k(\cdot, x) \in \Ha_0$ for any $x \in \Omega$.
+Furthermore we have
+\begin{align*}
+(f, k(\cdot, x))_{\Ha} = \sum_{i=1}^N \alpha_i k(x, x_i) = f(x),
+\end{align*}
+i.e.\ also the reproducing property is satisfied.
+This allows us to show that the semi-inner product is actually an inner product:
+Let $f \in \Ha_0$ with $\Vert f \Vert_{\Ha_0} = 0$. 
+We would like to conclude $f = 0$.
+To see this, we use the Cauchy-Schwarz inequality (which is applicable to semi-inner products) to estimate
+\begin{align*}
+|f(x)| = |(f, k(\cdot, x))_{\Ha_0}| \leq \Vert f \Vert_{\Ha_0} \cdot \Vert k(\cdot, x) \Vert_{\Ha_0},
+\end{align*}
+i.e.\ $\Vert f \Vert_{\Ha_0} = 0$ implies $f = 0$.
+
+Finally we have shown that $(\Ha_0, (\cdot, \cdot)_{\Ha_0})$ is a pre-Hilbert space.
+From functional analysis it is known, that pre-Hilbert spaces can be completed in an abstract way. 
+We see the details in the following:
+\begin{align*}
+\ns := \{ f: \Omega \rightarrow \R ~ | ~ \exists \{ f_n \}_{n \in \N} \subset \Ha_0 ~ \text{Cauchy sequence s.t.~} \lim_{n\rightarrow \infty} f_n = f \}, \\
+(f, g)_{\ns} := (\lim_{n \rightarrow \infty} f_n, \lim_{m \rightarrow \infty} g_m)_{\ns} = \lim_{n \rightarrow \infty} \lim_{m \rightarrow \infty} (f_n, g_m)_{\Ha_0}
+\end{align*}
+for $f = \lim_{n \rightarrow \infty} f_n$ and $g = \lim_{m \rightarrow \infty} g_m$.
+
+Note that, in general, the definiton of the abstractly completed space $\ns$ is given directly by all the Cauchy sequences within $\Ha_0$.
+However here we can directly identity these Cauchy sequences with a limiting function $f: \Omega \rightarrow \R$, 
+because any Cauchy Sequence in $\Ha_0$ converges pointwise:
+\begin{align*}
+|f_n(x) - f_m(x)| \leq \Vert f_n - f_m \Vert_{\Ha_0} \sqrt{k(x, x)} \quad \text{for all~} x \in \Omega.
+\end{align*}
+Also observe that $\Ha_0 \subset \ns$, because for any $f \in \Ha_0$ simply consider the Cauchy sequence $\{ f \}_{i=1}^\infty$.
+Next, we show that the reproducing property of $k$ within $\Ha_0$ carries over due to continuity:
+\begin{align*}
+f(x) = \lim_{n \rightarrow \infty} f_n(x) = \lim_{n \rightarrow \infty} (f_n, k(\cdot, x))_{Ha_0} = (\lim_{n \rightarrow \infty} f_n, k(\cdot, x))_{Ha_0} = (f, k(\cdot, x)_{\ns}.
+\end{align*}
+Finally we observe that $\ns$ is unique:
+Assume there is another RKHS $\Ha$. 
+Due to \Cref{def:rkhs} we have again $\Ha_0 \subset \Ha$, 
+thus we can run the same construction and end up with $\Ha = \ns$.
 
 
 
+
+\end{proof}
+
+
+In \Cref{th:moore_aronszajn} we started to use the notation $\ns$ instead of $\Ha$ -- this is due to the links between a kernel and its RKHS:
+\begin{itemize}
+\item \Cref{thm:rkhs_1} showed that the reproducing kernel of a RKHS is unique and PD.
+\item \Cref{th:moore_aronszajn} showed that every PD kernel gives rise to a unique RKHS.
+\end{itemize}
+
+In \Cref{th:feature_map_kernel} we saw, that it is possible to define kernel via a feature map. 
+The following proposition shows,
+that there is always a special feature map associated to a kernel:
+
+\begin{prop}[Kernel feature map]
+Let $k$ be a PD kernel on $\Omega$. 
+The \underline{kernel feature map} given by $\phi: \Omega \rightarrow \ns, \phi(x) := k(\cdot, x)$ defines the kernel. 
+\end{prop}
+
+\begin{proof}
+\Cref{th:moore_aronszajn} ensures the existence of $\ns$ and shows that $k(\cdot, x) \in \ns$. 
+That this kernel feature map indeed defines the kernel, follows from the reproducing property:
+\begin{align*}
+(\phi(x), \phi(z))_{\ns} = (k(\cdot, x), k(\cdot, z))_{\ns} = k(x, z).
+\end{align*}
+\end{proof}
+
+
+
+\begin{prop}
+Let $k$ be a SPD kernel on $\Omega$.
+If $\dim(\Omega) = \infty$, then $\dim(\ns) = \infty$.
+\end{prop}
+
+
+\begin{proof}
+Consider $N$ pairwise distinct points $X_N \subset \Omega$.
+Since $k$ is SPD, we have that $\{k(\cdot, x_j) \}_{j=1}^N$ are linearly independent by \Cref{prop:riesz_rksh}. 
+Furthermore we have $\{k(\cdot, x_j) \}_{j=1}^N \subset \ns$ by definition of an RKHS in \Cref{def:rkhs}.
+Thus $\mathrm{span} \{ k(\cdot, x_j), j=1, ..., N \} \subset \ns$ has dimensionality $N$.
+As this holds for any $N \in \N$, we conclude $\dim(\ns) = \infty$.
+\end{proof}
+
+
+
+\section{Kernel interpololation in RKHS}
+
+In the previous sections we saw,
+that kernel interpolation is well defined and that there is a unique reproducing kernel Hilbert space of functions associated to every PD kernel.
+This section focusses on analyzing properties of kernel interpolation in RKHS.
+For this, we will focus on SPD kernels in the following and consider the following setting:
+Given $N$ pairwise distinct points $X_N \subset \Omega$ and a function $f \in \ns$, 
+we denote the kernel interpolant as $s_f$.
+Then we have:
+
+
+\begin{prop}
+\label{prop:interpolation_projection}
+Let $k$ be a SPD kernel on $\Omega$, $X_N \subset \Omega$ be $N$ pairwise distinct points and $f \in \mathcal{C}(\Omega)$. 
+Consider 
+\begin{align*}
+V(X_N) := \mathrm{span}\{ k(\cdot, x_i), x_i \in X_N \}.
+\end{align*}
+\begin{enumerate}
+\item $V(X_N) \subset \ns$ is an $N$-dimensional subspace
+\item $s_f \in V(X_N)$
+\item If $f \in \ns$, then $s_f = \Pi_{V(X_N)}(f)$ (using the orthogonal projection $\Pi_{V(X_N)}: \ns \rightarrow V(X_N)$) 
+\end{enumerate}
+\end{prop}
+
+\begin{proof}
+\begin{enumerate}
+\item The definition of the RKHS yields that $V(X_N) \subset \ns$.
+As $k$ is SPD, it follows that $V(X_N)$ is $N$-dimensional by \Cref{prop:riesz_rksh}.
+\item This holds by definition of $s_f$.
+\item We need to show that $f - s_f \perp V(X_N)$. 
+We use that $\{ k(\cdot, x_i) \}_{i=1}^N$ is a basis of $V(X_N)$ and compute
+\begin{align}
+\label{eq:orthogonality_f_sf}
+(f-s_f, k(\cdot, x_i))_{\ns} = (f, k(\cdot, x_i))_{\ns} - (s_f, k(\cdot, x_i))_{\ns} = f(x_i) - s_f(x_i) = 0
+\end{align}
+for any $i=1, ..., N$.
+By linearity, this shows that $f-s_f$ is orthogonal to $V(X_N)$.
+\end{enumerate}
+\end{proof}
+
+We saw that interpolation amounts to orthogonal projection.
+By using properties of orthogonal projections, we can conclude the following.
+
+\begin{coro}
+\label{cor:projection_interpolant}
+Let $k$ be a SPD kernel on $\Omega$, $X_N \subset \Omega$ be $N$ pairwise distinct points and $g \in \ns$.
+\begin{itemize}
+\item $g \in V(X_N)^\perp \Leftrightarrow g(x_i) = 0$ for all $x_i \in X_N$.
+\end{itemize}
+Each $f \in \ns$ can be uniquely decomposed as $f = s_f + (f-s_f)$ such that
+\begin{align*}
+&s_f \in V(X_N), s_f(x_i) = f(x_i) \text{~ for all\ } x_i \in X_N \\
+&(f-s_f) \in V(X_N)^\perp, (f-s_f)(x_i) = 0 \text{~ for all\ } x_i \in X_N \\
+&(s_f, f-s_f)_{\ns} = 0 \\
+&\Vert f \Vert_{\ns}^2 = \Vert s_f \Vert_{\ns}^2 + \Vert f - s_f \Vert_{\ns}^2
+\end{align*}
+\end{coro}
+
+\begin{proof}
+% The statement of the bullet point is exactly the calculation from Eq.~\eqref{eq:orthogonality_f_sf}.
+All the statements follow directly from properties of orthogonal projections by decomposing any $f \in \ns$ into $f = g + g^\perp$ with $g = \Pi_{V(X_N)}(f)$ and $g^\perp = \Pi_{V(X_N)^\perp}(f)$ and using $s_f = g$ and thus $g^\perp = f - s_f$. \\
+For example, for the last property we have
+\begin{align*}
+\Vert f \Vert_{\ns}^2 &= (g + g^\perp, g + g^\perp)_{\ns} \\
+&= \Vert g \Vert_{\ns}^2 + 2(g, g^\perp)_{\ns} + \Vert g^\perp \Vert_{\ns}^2 \\
+&= \Vert g \Vert_{\ns}^2 + \Vert g^\perp \Vert_{\ns}^2.
+\end{align*} 
+\end{proof}
+
+In the following two propositions, we will analyze two variants of our interpolation problem.
+First, in \Cref{prop:best_approx_by_interpol} we will discuss what will happen, if we keep the ansatz space $V(X_N)$ but do not focus on interpolation anymore.
+Second, in \Cref{prop:minimal_norm_interpol} we will discuss what will happen, if we keep the interpolation conditions, but do not focus on the ansatz space $V(X_N)$ anymore.
+
+\begin{prop}[Best approximation by interpolation]
+\label{prop:best_approx_by_interpol}
+Let $k$ be a SPD kernel on $\Omega$, $X_N \subset \Omega$ be $N$ pairwise distinct points.
+The kernel interpolant $s_f$ is the unique best-approximant from the space $V(X_N)$ to a function $f \in \ns$:
+\begin{align*}
+	\Vert f - s_f \Vert_{\ns} = \min_{s \in V(X_N)} \Vert f - s \Vert_{\ns}. 
+\end{align*}
+\end{prop}
+
+\begin{proof}
+This follows directly from the fact that $s_f$ is the orthogonal projection of $f$ onto $V(X_N)$, see the \Cref{prop:interpolation_projection}.
+\end{proof}
+
+\begin{prop}[Minimal norm interpolation]
+\label{prop:minimal_norm_interpol}
+Let $k$ be a SPD kernel on $\Omega$, $X_N \subset \Omega$ be $N$ pairwise distinct points.
+Let
+\begin{align*}
+	S := \{ s \in \ns: s(x_i) = f(x_i), i=1, ..., N\}
+\end{align*}
+be the space of interpolating functions in $\ns$. 
+Then it holds
+\begin{align*}
+\Vert s_f \Vert_{\ns} = \min_{s \in S} \Vert s \Vert_{\ns},
+\end{align*}
+with the minimum being unique.
+\end{prop}
+
+\begin{proof}
+Apparently $s_f \in S$.
+Furthermore, within $V(X_N)$, 
+there is no other interpolant.
+Now we show that any other interpolating function has higher norm:
+Consider any $s \in S$.
+By \Cref{cor:projection_interpolant} we may decompose $s = g + g^\perp$ with $g \in V(X_N)$ and $g^\perp \perp V(X_N)$.
+By \Cref{cor:projection_interpolant} it furthermore follows that $g(x_i) = s(x_i) = f(x_i)$ and thus that $g = s_f$ by uniqueness of the interpolant within $V(X_N)$.
+Finally we have
+\begin{align*}
+\Vert s \Vert_{\ns}^2 = \Vert g \Vert_{\ns}^2 + \Vert g^\perp \Vert_{\ns}^2 = \Vert s_f \Vert_{\ns}^2 + \Vert g^\perp \Vert_{\ns}^2 \geq \Vert s_f \Vert_{\ns}^2.
+\end{align*}
+This shows, that as soon as $s \notin V(X_N)$, we have $g^\perp \neq 0$ and thus $\Vert s \Vert_{\ns}^2 > \Vert s_f \Vert_{\ns}^2$.
+\end{proof}
+
+
+In the following we turn briefly to error estimates, i.e.\
+ways to bound $f - s_f$.
+The following proposition is very basic:
+
+\begin{prop}[Simple bound]
+Let $k$ be a SPD kernel on $\Omega$, $X \subset Y \subset \Omega$ be each pairwise distinct points and $f \in \ns$.
+Let $s_{f, X}$ and $s_{f, Y}$ be the corresponding kernel interpolants.
+Then it holds
+\begin{align*}
+V(X) &\subset V(Y) \\
+\Vert s_{f, X} \Vert_{\ns} &\leq \Vert s_{f, Y} \Vert_{\ns} \leq \Vert f \Vert_{\ns} \\
+\Vert f - s_{f, Y} \Vert_{\ns} &\leq \Vert f - s_{f, X} \Vert_{\ns} \leq \Vert f \Vert_{\ns}
+\end{align*}
+\end{prop}
+
+\begin{proof}
+As $X \subset Y$, it directly follows $V(X) \subset V(Y)$ by definition of the spaces $V(X), V(Y)$.
+By \Cref{cor:projection_interpolant} we furthermore obtain $\Vert s_{f, X} \Vert_{\ns} \leq \Vert f \Vert_{\ns}$ as well as $\Vert f - s_{f, X} \Vert_{\ns} \leq \Vert f \Vert_{\ns}$.
+The remaining inequalities follow likewise by \Cref{cor:projection_interpolant} by observing that the interpolant $s_{f, X}$ of $f$ in $X$ and the interpolant $s_{s_{f, Y}, X}$ of $s_{f, Y}$ in $X$ coincide due to $X \subset Y$ and $s_{f, Y}(x_i) = f(x_i)$ for all $x_i \in X$.
+\end{proof}
+
+In order to have more sophisticated error estimates, we need to introduced the power function:
+
+
+\begin{definition}[Power function]
+Let $s_{f, X}$ be the kernel interpolant of $f$ in $X$. 
+The \underline{power function} is defined as
+\begin{align}
+\label{eq:power_function}
+P_{X_N}(x) = \sup_{0 \neq f \in \ns} \frac{|f(x) - s_{f, X}(x)|}{\Vert f \Vert_{\ns}}
+\end{align}
+\end{definition}
+
+We see, that by rearranging the definition of the power function in Eq.~\eqref{eq:power_function}, 
+we immediately obtain an error bound:
+\begin{align*}
+|f(x) - s_f(x)| \leq P_{X_N}(x) \cdot \Vert f \Vert_{\ns}
+\end{align*}
+This error bound splits into the power function factor, which is independent of the function,
+and the RKHS norm factor, which is independent of the points $X_N$.
+
+However, the definition of the power function of Eq.~\eqref{eq:power_function} seems infeasbile to compute.
+Therefore we will see in the following, 
+how the power function can be computed in practice:
+
+\begin{prop}
+\label{prop:power_func_via_lagrange}
+The power function can be computed as
+\begin{align*}
+P_{X_N}(x) = \sqrt{k(x, x) - \sum_{i=1}^N \sum_{j=1}^N k(x, x_i) (A^{-1})_{ij} k(x, x_j)}
+\end{align*}
+\end{prop}
+
+We do not state the proof here, because it is not necessary or helpful for the following.
+We stated \Cref{prop:power_func_via_lagrange} only to show that there is a computational feasible way to compute the power function:
+Only the kernel and the input points $X_N$ need to be known.
+
+
+%\begin{definition}[Lagrange basis]
+%Let $k$ be a SPD kernel on $\Omega$, $X \subset Y \subset \Omega$ be each pairwise distinct points.
+%The \underline{Lagrange basis} is defined as
+%\begin{align*}
+%\ell_j(x) = \sum_{i=1}^N (A^{-1})_{ij} k(x, x_i), \quad j=1, ..., N.
+%\end{align*}
 %
+%\end{definition}
 %
+%\begin{prop}
+%It holds $\ell_j(x_k) = \delta_{kj}$ for all $j,k=1, ..., N$.
+%\end{prop}
 %
+%\begin{proof}
+%This can be directly verified by using the definition of the Lagrange basis.
+%For any $j, k = 1, ..., N$ we have
+%\begin{align*}
+%\ell_j(x_k) &= \sum_{i=1}^N (A^{-1})_{ij} k(x_k, x_i) = \sum_{i=1}^N (A^{-1})_{ji} A_{ik} = (A^{-1}A)_{jk} = \delta_{jk}.
+%\end{align*}
+%\end{proof}
+
+
+
+
+\section{Translational invariant kernels and radial basis function kernels}
+
+
+So far, all the results have been rather abstract.
+In the following, we will briefly discuss two popular classes of kernels, namely ``translational invariant kernels'' and ``radial basis function kernels''.
+We start with the definition:
+
+\begin{definition}
+A kernel $k: \R^d \times \R^d \rightarrow \R$ is called 
+\begin{itemize}
+\item \underline{translational invariant}, if
+\begin{align*}
+k(x, y) = k(x+z, y+z) \quad \text{for all\ } x, y, z \in \R^d
+\end{align*}
+\item \underline{radial/radially invariant}, if
+\begin{align*}
+k(x, y) = k(z, w)
+\end{align*}
+for all $x, y, z, w \in \R^d$ such that $\Vert x - z \Vert = \Vert z - w \Vert$.
+\end{itemize}
+
+\end{definition}
+
+These kernels can be characterized in also in a different way:
+
+\begin{prop}
+A kernel $k: \R^d \times \R^d \rightarrow \R$ is 
+\begin{itemize}
+\item translational invariant, if and only if there exists a function $\Phi: \R^d \rightarrow \R$ such that it holds
+\begin{align*}
+k(x, y) = \Phi(x - y) \quad \text{for all\ } x, z \in \R^d.
+\end{align*}
+\item radial, if and only if there exists a function $\Phi: \R_{\geq 0} \rightarrow \R$ such that it holds
+\begin{align*}
+k(x, y) = \Phi(\Vert x - y \Vert) \quad \text{for all\ } x, z \in \R^d.
+\end{align*}
+\end{itemize}
+\end{prop}
+
+\begin{proof}
+\begin{itemize}
+\item Let $k(x, y) = \Phi(x-y)$. 
+Then one can directly calculate
+\begin{align*}
+k(x + z, y + z) = \Phi(x + z - (y+z)) = \Phi(x - y) = k(x, y).
+\end{align*}
+Now assume that it holds
+\begin{align*}
+k(x, y) = k(x+z, y+z) \quad \text{for all\ } x, y, z \in \R^d.
+\end{align*}
+Then, for any fixed $x_0 \in \R^d$, we define $\Phi(x) = k(x_0, x_0 - x)$. 
+With $z:= -x+x_0$ we can calculate
+\begin{align*}
+k(x, y) = k(x-x+x0, y-x+x_0) = k(x_0, x_0-(x-y)) = \Phi(x-y).
+\end{align*}
+It is left to show, that the definition of $\Phi$ actually does not depend on the choice of $x_0$.
+Thus we consider $\tilde{x}_0 \in \R^d$ and compute
+\begin{align*}
+\Phi(x) = k(x_0, x_0 - x) = k(x_0 + (\tilde{x}_0 - x_0), x_0 - x + (\tilde{x}_0 - x_0)) = k(\tilde{x}_0, \tilde{x}_0 - x).
+\end{align*}
+This shows that the definition of $\Phi$ actually does not depend on the choice of $x_0$.
+\item Let $k(x, y) = \Phi(\Vert x - y\Vert)$ and $z, w \in \R^d$ such that $\Vert x - y\Vert = \Vert z - w\Vert$. 
+Then we diretly have
+\begin{align*}
+k(x, y) = \Phi(\Vert x - y\Vert) = \Phi(\Vert z - w\Vert) = k(z, w).
+\end{align*}
+Now assume that it holds $k(x, y) = k(z, w)$ for all $x, y, z, w \in \R^d$ such that $\Vert x - y \Vert = \Vert z - w \Vert$.
+Then, for any fixed $x_0 \in \R^d$, we define $\Phi(r) = k(x_0, x_0 + re_1)$ with $e_1 \in \R^d$ being the first unit vector in the Euclidean system.
+Consider $z := x_0$ and $w := x_0 + \Vert x - y \Vert e_1$,
+which satisfy $\Vert x - y \Vert = \Vert z - w\Vert$, i.e.\
+\begin{align*}
+k(x, y) = k(x_0, x_0 + \Vert x - y \Vert e_1) = \Phi(\Vert x - y \Vert).
+\end{align*}
+As before, it is left to show that the definition of $\Phi$ actually does not depend on the choice of $x_0$ and $e_1$.
+Thus consider $\tilde{x_0}, v \in \R^d$ such that $\Vert v \Vert = 1$.
+We see directly
+\begin{align*}
+\Phi(r) \equiv k(x_0, x_0 + re_1) = k(\tilde{x}_0, \tilde{x}_0 + rv)
+\end{align*}
+due to $\Vert x_0 + re_1 - x_0 \Vert = r = \Vert \tilde{x}_0 + rv - \tilde{x}_0 \Vert$.
+\end{itemize}
+
+\end{proof}
+
+We continue with some commments:
+The radial kernels are frequently also called \underline{radial basis function kernels} (RBF kernels).
+It is obvious, that RBF kernels are also translational invariant,
+but that not every translational invariant kernel needs to be an RBF kernel.
+Any RBF kernels can be tuned with help of a \underline{shape parameter} $\varepsilon > 0$ as
+\begin{align*}
+k(x, z) = \Phi(\varepsilon \Vert x - z \Vert).
+\end{align*}
+This shape parameter $\varepsilon > 0$ allows to adapt the kernel to the domain $\Omega$,
+or in applications to the data $X_N$ and the corresponding target values.
+
+In the following we will see how to deduce properties of $k$ from $\Phi$
+
+
+
 %% \section{Basic properties and examples}
 %\section{Kernels}
 %
