@@ -357,6 +357,7 @@ We verify the condition from the definition in \Cref{def:positive_def_kernels}:
 We continue with some further elementary properties on kernels:
 
 \begin{prop}
+\label{prop:non_negativity_diagonal}
 Let $k: \Omega \times \Omega \rightarrow \R$ be a PD kernel. Then:
 \begin{itemize}
 \item Non-negativity of the diagonal: 
@@ -412,6 +413,7 @@ The proofs are rather elementary and mostly directly follow from the definitions
 Finally we will see, that the Gaussian kernel from \Cref{ex:kernels} is SPD:
 
 \begin{prop}
+\label{prop:spd_gaussian}
 The Gaussian kernel $k: \Omega \times \Omega \rightarrow \R$ for $\Omega \subset \R^d$ given as
 \begin{align*}
 k(x, z) = \exp(-\Vert x - z \Vert^2)
@@ -432,11 +434,12 @@ For our Gaussian kernel, we recall the following:
 \exp(-x^2) = \mathcal{F}^{-1} \left[\frac{1}{\sqrt{2}} \cdot \exp(-\omega^2 / 4) \right](x).
 \end{align*}
 With this, we can straightforward compute:
-\begin{align*}
-\alpha^\top A_{k, X_N} \alpha &= \sum_{j, l=1}^N \alpha_j \alpha_l k(x_j, x_l) = \sum_{j, l=1}^N \alpha_j \alpha_l e^{-(x_j - x_l)^2} \\
-&= \frac{1}{\sqrt{2\pi}} \cdot \sum_{j, l=1}^N \alpha_j \alpha_l \int_{-\infty}^\infty e^{i(x_j - x_l)\omega} \hat{\Phi}(\omega) ~ \mathrm{d}\omega \\
+\begin{align}
+\label{eq:spd_via_fourier}
+\alpha^\top A_{k, X_N} \alpha &= \sum_{j, l=1}^N \alpha_j \alpha_l k(x_j, x_l) = \sum_{j, l=1}^N \alpha_j \alpha_l e^{-(x_j - x_l)^2} \notag \\
+&= \frac{1}{\sqrt{2\pi}} \cdot \sum_{j, l=1}^N \alpha_j \alpha_l \int_{-\infty}^\infty e^{i(x_j - x_l)\omega} \hat{\Phi}(\omega) ~ \mathrm{d}\omega \notag \\
 &= \frac{1}{\sqrt{2\pi}} \cdot \int_{-\infty}^\infty \hat{\Phi}(\omega) \cdot \left| \sum_{j=1}^N \alpha_j e^{ix_j \omega} \right|^2 ~ \mathrm{d}\omega.
-\end{align*}
+\end{align}
 Since $\hat{\Phi}(\omega) > 0$ and $\left| \sum_{j=1}^N \alpha_j e^{ix_j \omega} \right|^2 > 0$ a.e.\ (as $X_N$ are pairwise distinct),
 we have $\alpha^\top A_{k, X_N} \alpha$.
 
@@ -1112,7 +1115,77 @@ k(x, z) = \Phi(\varepsilon \Vert x - z \Vert).
 This shape parameter $\varepsilon > 0$ allows to adapt the kernel to the domain $\Omega$,
 or in applications to the data $X_N$ and the corresponding target values.
 
-In the following we will see how to deduce properties of $k$ from $\Phi$
+In the following we will see how to deduce properties of $k$ from $\Phi$.
+For this, we briefly recall the Fourier transform and its inverse as well as some elementary properties.
+
+\begin{definition}
+For $f \in L^1(\R^d)$, the Fourier transform is defined as
+\begin{align*}
+\hat{f}(\omega) := \mathcal{F}[f](\omega) = (2\pi)^{-d/2} \cdot \int_{\R^d} f(x) e^{-ix^\top \omega} ~ \mathrm{d}x, \quad \omega \in \R^d.
+\end{align*}
+The inverse Fourier transform is defined as
+\begin{align*}
+\check{f}(\omega) := \mathcal{F}^{-1}[f](\omega) = (2\pi)^{-d/2} \cdot \int_{\R^d} f(x) e^{ix^\top \omega} ~ \mathrm{d}x, \quad \omega \in \R^d.
+\end{align*}
+\end{definition}
+
+\begin{prop}
+\label{prop:fourier_transform}
+Let $f \in L^1(\R^d)$:
+\begin{itemize}
+\item $\hat{f}$ is continuous
+\item If $f(x) = f(-x)$ for all $x \in \R^d$, then $\hat{f}(\omega) \in \R^d$
+\item If also $\hat{f} \in L^1(\R^d)$, then $\mathcal{F}^{-1}[\hat{f}] = f$.
+\item If $g \in L^1(\R^d)$, then $\int_{\R^d} f(x) \hat{g}(x) ~ \mathrm{d}x = \int_{\R^d} \hat{f}(x) g(x) ~ \mathrm{d}x$
+\item If $a \in \R^d$, then $\mathcal{F}[f](x-a) = e^{-ix^\top a} \hat{f}(x)$.
+\end{itemize}
+\end{prop}
+
+Let $k(x, z) = \Phi(x-z)$ be a positive definite translational invariant kernel.
+The following proposition concludes properties on the function $\Phi$:
+
+\begin{prop}
+Let $k(x, z) = \Phi(x-z)$ be a PD translational invariant kernel on $\R^d$.
+Then for all $x \in \R^d$ it holds
+\begin{enumerate}
+\item $\Phi(x) = \Phi(-x)$ and thus $\hat{\Phi}(\omega) \in \R$ for all $\omega \in \R^d$
+\item $\Phi(0) \geq 0$
+\item $|\Phi(x)| \leq \Phi(0)$
+\item $\Phi(0) = 0$ implies $\Phi = 0$.
+\end{enumerate}
+\end{prop}
+
+
+\begin{proof}
+\begin{enumerate}
+\item We leverage the definition and the symmetry of the kernel $k$ to compute:
+\begin{align*}
+\Phi(x) = \Phi(x - 0) = k(x, 0) = k(0, x) = \Phi(0 - x) = \Phi(-x).
+\end{align*}
+The fact that $\hat{\Phi}(\omega) \in \R$ now follows from \Cref{prop:fourier_transform}.
+\item We have $0 \leq k(x, x) = \Phi(x-x) = \Phi(0)$, where the first inequality is due to the non-negativity of the diagonal of the kernel, see \Cref{prop:non_negativity_diagonal}.
+\item We have $|\Phi(x)| = |k(x, 0)| \leq \sqrt{k(x, x)} \cdot \sqrt{k(0, 0)} = \sqrt{\Phi(x-x)} \cdot \sqrt{\Phi(0-0)} = \Phi(0)$,
+for which the Cauchy Schwarz inequality from \Cref{prop:non_negativity_diagonal} was used.
+\item This is a direct consequence from the previous point.
+\end{enumerate}
+\end{proof}
+
+Finally we can characterize positive definite translational invariant kernels with help of their Fourier transform.
+
+\begin{thm}
+Let $\Phi: \R^d \rightarrow \R$, $\Phi \in L^1(\R^d)$.
+Then $k(x, z) = \Phi(x - z)$ is strictly positive definite if and only if $\hat{\Phi}$ is continuous, non-negative and non-vanishing.
+\end{thm}
+
+The proof is essentially the same as the one of \Cref{prop:spd_gaussian},
+however now more generally instead of focussed on the Gaussian kernel.
+The key step is to use the representation
+\begin{align*}
+\alpha^\top A_{k, X_N} \alpha = \frac{1}{\sqrt{2\pi}^d} \cdot \int_{\R^d} \hat{\Phi}(\omega) \cdot \left| \sum_{j=1}^N \alpha_j e^{ix_j \omega} \right|^2 ~ \mathrm{d}\omega,
+\end{align*}
+see Eq.~\eqref{eq:spd_via_fourier}.
+
+
 
 
 
